@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <PackageId>WeaveLLM.Extensions.DependencyInjection</PackageId>
+    <Version>0.1.0-alpha</Version>
+    <Authors>Your Name</Authors>
+    <Description>Microsoft.Extensions.DependencyInjection integration for WeaveLLM. Fluent builder for ASP.NET Core and Worker Services.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\WeaveLLM.Core\WeaveLLM.Core.csproj" />
+    <ProjectReference Include="..\WeaveLLM.Providers\WeaveLLM.Providers.csproj" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0" />
+  </ItemGroup>
+</Project>

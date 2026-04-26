@@ -1,0 +1,32 @@
+# Build output
+bin/
+obj/
+
+# NuGet packages output
+nupkgs/
+
+# NuGet restore cache
+*.nupkg
+*.snupkg
+packages/
+
+# User-specific files
+*.user
+*.suo
+.vs/
+
+# Rider
+.idea/
+
+# VS Code
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# dotnet tool manifests (keep if checked in intentionally)
+# .config/dotnet-tools.json
+
+# Test results
+TestResults/

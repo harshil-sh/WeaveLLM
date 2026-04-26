@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <PackageId>WeaveLLM.Providers</PackageId>
+    <Version>0.1.0-alpha</Version>
+    <Authors>Your Name</Authors>
+    <Description>LLM provider implementations for WeaveLLM — OpenAI, Anthropic, Azure OpenAI, Ollama.</Description>
+    <PackageTags>ai;llm;openai;anthropic;azure;ollama;dotnet;weavellm</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\WeaveLLM.Core\WeaveLLM.Core.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <RootNamespace>WeaveLLM.Core</RootNamespace>
+    <AssemblyName>WeaveLLM.Core</AssemblyName>
+
+    <!-- NuGet package metadata -->
+    <PackageId>WeaveLLM.Core</PackageId>
+    <Version>0.1.0-alpha</Version>
+    <Authors>Your Name</Authors>
+    <Description>Core abstractions for WeaveLLM — AI orchestration framework for .NET. Strongly typed chains, agents, memory, RAG, and tool use.</Description>
+    <PackageTags>ai;llm;langchain;dotnet;csharp;rag;agents;openai;anthropic;semantic-kernel</PackageTags>
+    <PackageProjectUrl>https://github.com/yourusername/WeaveLLM</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/yourusername/WeaveLLM</RepositoryUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" />
+    <PackageReference Include="System.Text.Json" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+</Project>
