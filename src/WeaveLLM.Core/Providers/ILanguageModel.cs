@@ -1,39 +1,49 @@
+#nullable enable
 using WeaveLLM.Core.Models;
 
 namespace WeaveLLM.Core.Providers;
 
 /// <summary>
-/// Provider-agnostic interface for all LLM text completion calls.
-/// Works with OpenAI, Anthropic, Azure, Ollama, HuggingFace, etc.
+/// Provider-agnostic interface for LLM text completion calls.
+/// Works with OpenAI, Anthropic, Azure, Ollama, HuggingFace, and others.
+/// Concrete implementations live in provider-specific packages (e.g., WeaveLLM.Providers.OpenAI).
 /// </summary>
 public interface ILanguageModel
 {
+    /// <summary>The provider's display name (e.g., <c>"openai"</c>, <c>"anthropic"</c>).</summary>
     string ProviderName { get; }
+
+    /// <summary>The model variant identifier (e.g., <c>"gpt-4o"</c>, <c>"claude-opus-4-7"</c>).</summary>
     string ModelId { get; }
 
+    /// <summary>Sends a plain-text prompt and returns the raw completion.</summary>
     Task<ChainResult<string>> CompleteAsync(
         string prompt,
         LLMOptions? options = null,
         CancellationToken cancellationToken = default);
 
+    /// <summary>Streams the completion token-by-token.</summary>
     IAsyncEnumerable<string> StreamCompleteAsync(
         string prompt,
         LLMOptions? options = null,
         CancellationToken cancellationToken = default);
 
+    /// <summary>Estimates the token count for <paramref name="text"/> using the provider's tokenizer.</summary>
     Task<int> CountTokensAsync(string text, CancellationToken cancellationToken = default);
 }
 
 /// <summary>
-/// Chat-specific model interface. Maintains message history.
+/// Chat-capable model interface. Processes a full conversation history and returns a structured reply.
 /// </summary>
 public interface IChatModel : ILanguageModel
 {
-    Task<ChainResult<Message>> ChatAsync(
+    /// <summary>Sends a conversation and returns a structured <see cref="ChatResponse"/>.</summary>
+    Task<ChainResult<ChatResponse>> ChatAsync(
         IReadOnlyList<Message> messages,
         LLMOptions? options = null,
         CancellationToken cancellationToken = default);
 
+    /// <summary>Streams the model's reply token-by-token.</summary>
     IAsyncEnumerable<string> StreamChatAsync(
         IReadOnlyList<Message> messages,
         LLMOptions? options = null,
@@ -41,70 +51,24 @@ public interface IChatModel : ILanguageModel
 }
 
 /// <summary>
-/// Embedding model for vector representations.
+/// Embedding model for converting text into dense vector representations.
 /// </summary>
 public interface IEmbeddingModel
 {
+    /// <summary>The provider's display name.</summary>
     string ProviderName { get; }
+
+    /// <summary>The model variant identifier.</summary>
     string ModelId { get; }
+
+    /// <summary>Output vector dimensionality (e.g., 1536 for text-embedding-3-small).</summary>
     int Dimensions { get; }
 
+    /// <summary>Embeds a single text string.</summary>
     Task<ChainResult<float[]>> EmbedAsync(string text, CancellationToken cancellationToken = default);
-    Task<ChainResult<float[][]>> EmbedBatchAsync(IReadOnlyList<string> texts, CancellationToken cancellationToken = default);
-}
 
-/// <summary>
-/// Tunable options per LLM call. All optional — each provider maps them to its own API params.
-/// </summary>
-public sealed class LLMOptions
-{
-    public float? Temperature { get; set; }
-    public float? TopP { get; set; }
-    public int? MaxTokens { get; set; }
-    public IReadOnlyList<string>? StopSequences { get; set; }
-    public float? FrequencyPenalty { get; set; }
-    public float? PresencePenalty { get; set; }
-    public int? Seed { get; set; }
-    public string? ResponseFormat { get; set; } // "json_object", "text"
-    public Dictionary<string, object> ProviderSpecific { get; set; } = new();
-
-    public static LLMOptions Deterministic(int maxTokens = 2048) =>
-        new() { Temperature = 0f, MaxTokens = maxTokens };
-
-    public static LLMOptions Creative(int maxTokens = 2048) =>
-        new() { Temperature = 0.9f, TopP = 0.95f, MaxTokens = maxTokens };
-
-    public static LLMOptions Balanced(int maxTokens = 2048) =>
-        new() { Temperature = 0.4f, MaxTokens = maxTokens };
-}
-
-/// <summary>
-/// A single message in a chat conversation.
-/// </summary>
-public sealed class Message
-{
-    public MessageRole Role { get; init; }
-    public string Content { get; init; } = string.Empty;
-    public string? Name { get; init; }
-    public IReadOnlyList<ToolCall>? ToolCalls { get; init; }
-    public string? ToolCallId { get; init; }
-    public DateTimeOffset Timestamp { get; init; } = DateTimeOffset.UtcNow;
-
-    public static Message System(string content) => new() { Role = MessageRole.System, Content = content };
-    public static Message User(string content) => new() { Role = MessageRole.User, Content = content };
-    public static Message Assistant(string content) => new() { Role = MessageRole.Assistant, Content = content };
-    public static Message Tool(string content, string toolCallId) =>
-        new() { Role = MessageRole.Tool, Content = content, ToolCallId = toolCallId };
-}
-
-public enum MessageRole { System, User, Assistant, Tool }
-
-/// <summary>
-/// Represents a function/tool call requested by the LLM.
-/// </summary>
-public sealed class ToolCall
-{
-    public string Id { get; init; } = Guid.NewGuid().ToString("N")[..8];
-    public string ToolName { get; init; } = string.Empty;
-    public string Arguments { get; init; } = "{}";
+    /// <summary>Embeds multiple texts in a single batched call.</summary>
+    Task<ChainResult<float[][]>> EmbedBatchAsync(
+        IReadOnlyList<string> texts,
+        CancellationToken cancellationToken = default);
 }
