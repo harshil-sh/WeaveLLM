@@ -8,8 +8,9 @@ using WeaveLLM.Core.Models;
 namespace WeaveLLM.Providers.Anthropic;
 
 /// <summary>
-/// Anthropic (Claude) provider — supports claude-3-5-sonnet, claude-opus-4, etc.
-/// Maps WeaveLLM's message format to Anthropic's messages API format.
+/// Anthropic (Claude) provider — supports claude-opus-4, claude-sonnet-4, claude-haiku-4, etc.
+/// Maps WeaveLLM's message format to Anthropic's messages API; system prompt goes to the
+/// top-level "system" field, not inside the messages array.
 /// </summary>
 public sealed class AnthropicChatModel(
     string apiKey,
@@ -18,9 +19,13 @@ public sealed class AnthropicChatModel(
 {
     private readonly HttpClient _http = httpClient ?? CreateDefaultClient(apiKey);
 
+    /// <inheritdoc/>
     public string ProviderName => "anthropic";
+
+    /// <inheritdoc/>
     public string ModelId { get; } = modelId;
 
+    /// <inheritdoc/>
     public async Task<ChainResult<ChatResponse>> ChatAsync(
         IReadOnlyList<Message> messages,
         LLMOptions? options = null,
@@ -36,7 +41,7 @@ public sealed class AnthropicChatModel(
 
             var request = new Dictionary<string, object>
             {
-                ["model"] = modelId,
+                ["model"] = ModelId,
                 ["max_tokens"] = options?.MaxTokens ?? 2048,
                 ["messages"] = conversationMessages
             };
@@ -49,8 +54,8 @@ public sealed class AnthropicChatModel(
 
             if (!response.IsSuccessStatusCode)
             {
-                var error = await response.Content.ReadAsStringAsync(cancellationToken);
-                return ChainResult<ChatResponse>.Failure(WeaveLLMError.ProviderError("anthropic", $"{response.StatusCode}: {error}"));
+                var body = await response.Content.ReadAsStringAsync(cancellationToken);
+                return MapHttpError<ChatResponse>(response.StatusCode, body);
             }
 
             var result = await response.Content.ReadFromJsonAsync<AnthropicResponse>(cancellationToken: cancellationToken);
@@ -60,13 +65,11 @@ public sealed class AnthropicChatModel(
                 PromptTokens = result?.Usage?.InputTokens ?? 0,
                 CompletionTokens = result?.Usage?.OutputTokens ?? 0
             };
-            var chatResponse = new ChatResponse
+            return ChainResult<ChatResponse>.Success(new ChatResponse
             {
                 Content = content,
                 Usage = new UsageStats(usage.PromptTokens, usage.CompletionTokens, usage.TotalTokens)
-            };
-
-            return ChainResult<ChatResponse>.Success(chatResponse, usage);
+            }, usage);
         }
         catch (Exception ex)
         {
@@ -74,6 +77,7 @@ public sealed class AnthropicChatModel(
         }
     }
 
+    /// <inheritdoc/>
     public async IAsyncEnumerable<string> StreamChatAsync(
         IReadOnlyList<Message> messages,
         LLMOptions? options = null,
@@ -87,17 +91,16 @@ public sealed class AnthropicChatModel(
 
         var request = new Dictionary<string, object>
         {
-            ["model"] = modelId,
+            ["model"] = ModelId,
             ["max_tokens"] = options?.MaxTokens ?? 2048,
             ["messages"] = conversationMessages,
             ["stream"] = true
         };
         if (!string.IsNullOrEmpty(systemMessage)) request["system"] = systemMessage;
 
-        var json = JsonSerializer.Serialize(request);
         using var req = new HttpRequestMessage(HttpMethod.Post, "messages")
         {
-            Content = new StringContent(json, Encoding.UTF8, "application/json")
+            Content = new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json")
         };
 
         using var response = await _http.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
@@ -113,25 +116,48 @@ public sealed class AnthropicChatModel(
             var data = line["data: ".Length..];
 
             var evt = JsonSerializer.Deserialize<AnthropicStreamEvent>(data);
-            if (evt?.Type == "content_block_delta" && evt.Delta?.Text is { } text)
+            if (evt?.Type == "content_block_delta"
+                && evt.Delta?.Type == "text_delta"
+                && evt.Delta.Text is { } text)
                 yield return text;
         }
     }
 
-    public async Task<ChainResult<string>> CompleteAsync(string prompt, LLMOptions? options = null, CancellationToken cancellationToken = default)
+    /// <inheritdoc/>
+    public async Task<ChainResult<string>> CompleteAsync(
+        string prompt,
+        LLMOptions? options = null,
+        CancellationToken cancellationToken = default)
     {
         var result = await ChatAsync([Message.User(prompt)], options, cancellationToken);
         return result.Map(m => m.Content);
     }
 
-    public async IAsyncEnumerable<string> StreamCompleteAsync(string prompt, LLMOptions? options = null, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    /// <inheritdoc/>
+    public async IAsyncEnumerable<string> StreamCompleteAsync(
+        string prompt,
+        LLMOptions? options = null,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         await foreach (var chunk in StreamChatAsync([Message.User(prompt)], options, cancellationToken))
             yield return chunk;
     }
 
+    /// <inheritdoc/>
     public Task<int> CountTokensAsync(string text, CancellationToken cancellationToken = default) =>
         Task.FromResult(text.Length / 4);
+
+    private static ChainResult<T> MapHttpError<T>(System.Net.HttpStatusCode statusCode, string body) =>
+        statusCode switch
+        {
+            System.Net.HttpStatusCode.Unauthorized => ChainResult<T>.Failure(
+                new WeaveLLMError("Anthropic API key invalid.", "INVALID_INPUT")),
+            System.Net.HttpStatusCode.TooManyRequests => ChainResult<T>.Failure(
+                new WeaveLLMError("Anthropic rate limit hit.", "RATE_LIMITED")),
+            _ when (int)statusCode == 529 => ChainResult<T>.Failure(
+                new WeaveLLMError("Anthropic overloaded. Retry.", "TIMEOUT")),
+            _ => ChainResult<T>.Failure(WeaveLLMError.ProviderError("anthropic", $"{statusCode}: {body}"))
+        };
 
     private static HttpClient CreateDefaultClient(string apiKey)
     {
@@ -157,5 +183,6 @@ public sealed class AnthropicChatModel(
         [property: JsonPropertyName("delta")] AnthropicStreamDelta? Delta);
 
     private sealed record AnthropicStreamDelta(
+        [property: JsonPropertyName("type")] string? Type,
         [property: JsonPropertyName("text")] string? Text);
 }
