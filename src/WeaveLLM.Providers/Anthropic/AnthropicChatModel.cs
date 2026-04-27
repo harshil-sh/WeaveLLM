@@ -4,7 +4,6 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using WeaveLLM.Core.Models;
-using WeaveLLM.Core.Providers;
 
 namespace WeaveLLM.Providers.Anthropic;
 
@@ -15,24 +14,24 @@ namespace WeaveLLM.Providers.Anthropic;
 public sealed class AnthropicChatModel(
     string apiKey,
     string modelId = "claude-sonnet-4-5",
-    HttpClient? httpClient = null) : IChatModel
+    HttpClient? httpClient = null) : WeaveLLM.Core.Providers.IChatModel
 {
     private readonly HttpClient _http = httpClient ?? CreateDefaultClient(apiKey);
 
     public string ProviderName => "anthropic";
     public string ModelId { get; } = modelId;
 
-    public async Task<ChainResult<Message>> ChatAsync(
+    public async Task<ChainResult<ChatResponse>> ChatAsync(
         IReadOnlyList<Message> messages,
         LLMOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         try
         {
-            var systemMessage = messages.FirstOrDefault(m => m.Role == MessageRole.System)?.Content;
+            var systemMessage = messages.FirstOrDefault(m => m.Role == Role.System)?.Content;
             var conversationMessages = messages
-                .Where(m => m.Role != MessageRole.System)
-                .Select(m => new { role = m.Role == MessageRole.User ? "user" : "assistant", content = m.Content })
+                .Where(m => m.Role != Role.System)
+                .Select(m => new { role = m.Role == Role.User ? "user" : "assistant", content = m.Content })
                 .ToList();
 
             var request = new Dictionary<string, object>
@@ -51,23 +50,27 @@ public sealed class AnthropicChatModel(
             if (!response.IsSuccessStatusCode)
             {
                 var error = await response.Content.ReadAsStringAsync(cancellationToken);
-                return ChainResult<Message>.Failure(WeaveLLMError.ProviderError("anthropic", $"{response.StatusCode}: {error}"));
+                return ChainResult<ChatResponse>.Failure(WeaveLLMError.ProviderError("anthropic", $"{response.StatusCode}: {error}"));
             }
 
             var result = await response.Content.ReadFromJsonAsync<AnthropicResponse>(cancellationToken: cancellationToken);
             var content = result?.Content?.FirstOrDefault()?.Text ?? string.Empty;
-            var message = Message.Assistant(content);
             var usage = new TokenUsage
             {
                 PromptTokens = result?.Usage?.InputTokens ?? 0,
                 CompletionTokens = result?.Usage?.OutputTokens ?? 0
             };
+            var chatResponse = new ChatResponse
+            {
+                Content = content,
+                Usage = new UsageStats(usage.PromptTokens, usage.CompletionTokens, usage.TotalTokens)
+            };
 
-            return ChainResult<Message>.Success(message, usage);
+            return ChainResult<ChatResponse>.Success(chatResponse, usage);
         }
         catch (Exception ex)
         {
-            return ChainResult<Message>.Failure(new WeaveLLMError(ex.Message, "PROVIDER_ERROR", ex));
+            return ChainResult<ChatResponse>.Failure(new WeaveLLMError(ex.Message, "PROVIDER_ERROR", ex));
         }
     }
 
@@ -76,10 +79,10 @@ public sealed class AnthropicChatModel(
         LLMOptions? options = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        var systemMessage = messages.FirstOrDefault(m => m.Role == MessageRole.System)?.Content;
+        var systemMessage = messages.FirstOrDefault(m => m.Role == Role.System)?.Content;
         var conversationMessages = messages
-            .Where(m => m.Role != MessageRole.System)
-            .Select(m => new { role = m.Role == MessageRole.User ? "user" : "assistant", content = m.Content })
+            .Where(m => m.Role != Role.System)
+            .Select(m => new { role = m.Role == Role.User ? "user" : "assistant", content = m.Content })
             .ToList();
 
         var request = new Dictionary<string, object>

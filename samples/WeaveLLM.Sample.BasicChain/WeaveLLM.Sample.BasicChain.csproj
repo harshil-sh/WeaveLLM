@@ -3,13 +3,12 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\WeaveLLM.Core\WeaveLLM.Core.csproj" />
     <ProjectReference Include="..\..\src\WeaveLLM.Providers\WeaveLLM.Providers.csproj" />
     <ProjectReference Include="..\..\src\WeaveLLM.Extensions.DependencyInjection\WeaveLLM.Extensions.DependencyInjection.csproj" />
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
   </ItemGroup>
 </Project>

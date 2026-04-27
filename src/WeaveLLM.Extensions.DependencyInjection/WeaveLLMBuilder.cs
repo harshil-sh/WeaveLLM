@@ -3,6 +3,7 @@ using WeaveLLM.Core.Memory;
 using WeaveLLM.Core.Providers;
 using WeaveLLM.Core.RAG;
 using WeaveLLM.Core.Tools;
+using IToolRegistry = WeaveLLM.Core.Tools.IToolRegistry;
 using WeaveLLM.Providers.Anthropic;
 using WeaveLLM.Providers.OpenAI;
 using Microsoft.Extensions.Configuration;
@@ -59,11 +60,12 @@ public sealed class WeaveLLMBuilder(IServiceCollection services)
 
     public WeaveLLMBuilder AddReActAgent(string agentName = "default")
     {
-        Services.AddTransient<IAgent>(sp => new ReActAgent(
-            sp.GetRequiredService<IChatModel>(),
-            sp.GetRequiredService<IToolRegistry>(),
-            agentName));
-        return this;
+        throw new NotImplementedException();
+    }
+
+    public WeaveLLMBuilder AddOllama(string baseUrl)
+    {
+        throw new NotImplementedException();
     }
 
     public WeaveLLMBuilder AddRagPipeline()

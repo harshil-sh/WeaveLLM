@@ -1,127 +1,96 @@
-You are building WeaveLLM — a strongly typed AI orchestration framework for .NET 8+, 
-positioned as a production-grade LangChain alternative for .NET developers.
+You are building WeaveLLM — a strongly typed AI orchestration framework for .NET 8+.
+The core interfaces have already been created in src/WeaveLLM.Core/.
 
-Create the full WeaveLLM.Core project with all core abstractions. The project lives at 
-src/WeaveLLM.Core/WeaveLLM.Core.csproj
+Create the full solution structure with all projects, the .sln file, and NuGet-ready 
+.csproj files for every package in the WeaveLLM ecosystem.
 
-## Design principles to follow throughout:
-- Errors as values: never throw for expected failures — use ChainResult<T>
-- CancellationToken on every async method, always last parameter
-- IAsyncEnumerable<T> for all streaming APIs
-- Full XML doc comments on every public type and member
-- Sealed classes where inheritance isn't intended
-- Nullable reference types enabled (#nullable enable)
+## Solution file
+Create WeaveLLM.sln in the repo root referencing all projects below.
 
-## Files to create:
+## Projects to create (empty skeletons — interfaces/implementations come later):
 
 ### 1. src/WeaveLLM.Core/WeaveLLM.Core.csproj
+Already exists — skip if present, otherwise create with:
 - TargetFramework: net8.0
-- Nullable enabled, ImplicitUsings enabled
-- NuGet metadata: PackageId=WeaveLLM.Core, Version=0.1.0-alpha, 
-  Description="Core abstractions for WeaveLLM — the AI orchestration framework for .NET",
-  Authors, MIT license, repo URL placeholder
+- Nullable + ImplicitUsings enabled
+- PackageId: WeaveLLM.Core
+- Version: 0.1.0-alpha
+- Description: "Core abstractions for WeaveLLM — the AI orchestration framework for .NET"
 
-### 2. src/WeaveLLM.Core/Chains/IChain.cs
-- IChain<TInput, TOutput> with ExecuteAsync(TInput, CancellationToken)
-  returning Task<ChainResult<TOutput>>
-- IChainMiddleware<TInput, TOutput> with InvokeAsync wrapping a next delegate
+### 2. src/WeaveLLM.Providers/WeaveLLM.Providers.csproj
+- References WeaveLLM.Core
+- NuGet deps: Microsoft.Extensions.Http, System.Text.Json
+- PackageId: WeaveLLM.Providers
+- Description: "OpenAI, Anthropic, Azure OpenAI, and Ollama providers for WeaveLLM"
+- Create placeholder folders: OpenAI/, Anthropic/, Azure/, Ollama/
+- Each folder gets an empty .gitkeep
 
-### 3. src/WeaveLLM.Core/Chains/ChainResult.cs
-- ChainResult<T> — discriminated union: Success(T value) | Failure(ChainError error)
-- Static factory methods: ChainResult.Success<T>(T), ChainResult.Failure<T>(ChainError)
-- IsSuccess, IsFailure, Value, Error properties
-- implicit operator from T to ChainResult<T>
-- Map<TOut>, Bind<TOut>, Match<TOut> functional methods
+### 3. src/WeaveLLM.Memory/WeaveLLM.Memory.csproj
+- References WeaveLLM.Core
+- PackageId: WeaveLLM.Memory
+- Description: "Memory and vector store implementations for WeaveLLM"
+- Create placeholder folders: InMemory/, Redis/, Postgres/
+- Each folder gets an empty .gitkeep
 
-### 4. src/WeaveLLM.Core/Chains/ChainError.cs
-- ChainError record with: string Code, string Message, Exception? InnerException
-- Static factory methods for common error codes: 
-  ProviderError, RateLimited, Timeout, InvalidInput, ContextTooLong, ToolExecutionFailed
+### 4. src/WeaveLLM.Observability/WeaveLLM.Observability.csproj
+- References WeaveLLM.Core
+- NuGet deps: OpenTelemetry (1.9.0), OpenTelemetry.Extensions.Hosting (1.9.0)
+- PackageId: WeaveLLM.Observability
+- Description: "OpenTelemetry tracing, metrics, and LLM evaluation for WeaveLLM"
 
-### 5. src/WeaveLLM.Core/Models/ILanguageModel.cs
-- ILanguageModel base interface with ModelId, ProviderId string properties
-- IChatModel : ILanguageModel with:
-  ChatAsync(IReadOnlyList<Message> messages, LLMOptions? options, CancellationToken)
-  returning Task<ChainResult<ChatResponse>>
-- IStreamingChatModel : IChatModel with:
-  StreamChatAsync(IReadOnlyList<Message> messages, LLMOptions? options, CancellationToken)
-  returning IAsyncEnumerable<string>
-- IEmbeddingModel : ILanguageModel with:
-  EmbedAsync(string text, CancellationToken) returning Task<ChainResult<float[]>>
-  EmbedBatchAsync(IReadOnlyList<string> texts, CancellationToken) 
-  returning Task<ChainResult<float[][]>>
+### 5. src/WeaveLLM.Extensions.DependencyInjection/WeaveLLM.Extensions.DependencyInjection.csproj
+- References: WeaveLLM.Core, WeaveLLM.Providers, WeaveLLM.Memory, WeaveLLM.Observability
+- NuGet deps: Microsoft.Extensions.DependencyInjection.Abstractions (8.0.0),
+  Microsoft.Extensions.Configuration.Abstractions (8.0.0)
+- PackageId: WeaveLLM.Extensions.DependencyInjection
+- Description: "ASP.NET Core and IServiceCollection integration for WeaveLLM"
+- Create src/WeaveLLM.Extensions.DependencyInjection/WeaveLLMBuilder.cs:
+  A WeaveLLMBuilder class with fluent methods that return 'this':
+    AddOpenAI(string apiKey, string? model = null)
+    AddAnthropic(string apiKey, string? model = null)
+    AddOllama(string baseUrl)
+    AddInMemoryMemory()
+    AddToolRegistry(Action<IToolRegistry> configure)
+    AddReActAgent()
+  And a static IServiceCollection extension:
+    services.AddWeaveLLM() returning WeaveLLMBuilder
+  Stub implementations — throw NotImplementedException() for now.
 
-### 6. src/WeaveLLM.Core/Models/Message.cs
-- Message record with Role (enum: System, User, Assistant, Tool) and Content string
-- Static factory methods: Message.System(), Message.User(), Message.Assistant(), Message.Tool()
-- Optional: ToolCallId string?, ToolName string?
+## Test projects to create:
 
-### 7. src/WeaveLLM.Core/Models/LLMOptions.cs
-- LLMOptions record with: float? Temperature, int? MaxTokens, float? TopP, 
-  string[]? StopSequences, bool? Stream
-- Static presets: LLMOptions.Balanced(), LLMOptions.Creative(), LLMOptions.Precise()
+### 6. tests/WeaveLLM.Core.Tests/WeaveLLM.Core.Tests.csproj
+- References WeaveLLM.Core
+- NuGet deps: Microsoft.NET.Test.Sdk, xunit (2.9.0), xunit.runner.visualstudio (2.8.0),
+  FluentAssertions (6.12.0), NSubstitute (5.1.0)
+- Create tests/WeaveLLM.Core.Tests/Chains/ChainResultTests.cs:
+  Placeholder xUnit test class with one passing test:
+  "ChainResult_Success_ShouldHaveIsSuccessTrue" asserting ChainResult.Success("ok").IsSuccess == true
 
-### 8. src/WeaveLLM.Core/Models/ChatResponse.cs
-- ChatResponse record with: string Content, string? FinishReason, 
-  UsageStats? Usage, IReadOnlyList<ToolCall>? ToolCalls
-- UsageStats record: int PromptTokens, int CompletionTokens, int TotalTokens
-- ToolCall record: string Id, string Name, string ArgumentsJson
+### 7. tests/WeaveLLM.Providers.Tests/WeaveLLM.Providers.Tests.csproj
+- References WeaveLLM.Providers, WeaveLLM.Core
+- Same test NuGet deps as above
+- Create one placeholder test file with a single passing test
 
-### 9. src/WeaveLLM.Core/Memory/IMemoryStore.cs
-- IMemoryStore with:
-  AddAsync(MemoryEntry entry, CancellationToken)
-  GetAsync(string sessionId, int limit, CancellationToken) returning IAsyncEnumerable<MemoryEntry>
-  ClearAsync(string sessionId, CancellationToken)
-- MemoryEntry record: string SessionId, Message Message, DateTimeOffset Timestamp
+## Shared build props:
+Create Directory.Build.props in the repo root:
+- All projects inherit: LangVersion=12.0, Nullable=enable, TreatWarningsAsErrors=false
+- NuGet shared metadata: Authors="WeaveLLM Contributors", 
+  PackageLicenseExpression=MIT,
+  PackageProjectUrl="https://github.com/yourusername/WeaveLLM",
+  RepositoryUrl="https://github.com/yourusername/WeaveLLM",
+  RepositoryType=git,
+  PackageReadmeFile=README.md,
+  PackageIconUrl placeholder
 
-### 10. src/WeaveLLM.Core/Memory/IVectorStore.cs
-- IVectorStore with:
-  UpsertAsync(VectorEntry entry, CancellationToken)
-  SearchAsync(float[] queryVector, int topK, CancellationToken) 
-  returning Task<ChainResult<IReadOnlyList<ScoredEntry>>>
-  DeleteAsync(string id, CancellationToken)
-- VectorEntry record: string Id, float[] Vector, string Content, 
-  IReadOnlyDictionary<string, string>? Metadata
-- ScoredEntry record: VectorEntry Entry, float Score
+Create Directory.Packages.props in the repo root with centrally managed package versions
+for all NuGet deps used across projects (Central Package Management).
 
-### 11. src/WeaveLLM.Core/Agents/IAgent.cs
-- IAgent with RunAsync(string input, CancellationToken) 
-  returning Task<ChainResult<AgentResult>>
-- AgentResult record: string FinalAnswer, IReadOnlyList<AgentStep> Steps, UsageStats? TotalUsage
-- AgentStep record: string Thought, string? ToolName, string? ToolInput, string? ToolOutput
+## .gitignore
+Create a .gitignore in the repo root tailored for .NET:
+- bin/, obj/, .vs/, *.user, TestResults/, .DS_Store, *.nupkg, .env
 
-### 12. src/WeaveLLM.Core/Agents/IToolRegistry.cs
-- IToolRegistry with:
-  Register(ToolDefinition tool)
-  TryGet(string name, out ToolDefinition? tool)
-  GetAll() returning IReadOnlyList<ToolDefinition>
-- ToolDefinition record: string Name, string Description, 
-  JsonElement ParameterSchema, Func<string, CancellationToken, Task<string>> Executor
-
-### 13. src/WeaveLLM.Core/Agents/LLMToolAttribute.cs
-- [LLMTool] attribute for methods: string Name, string Description
-- [Description] attribute re-export or note to use System.ComponentModel.Description 
-  for parameters
-
-### 14. src/WeaveLLM.Core/Graphs/AgentGraph.cs
-- AgentGraph<TState> with fluent builder:
-  AddNode(string name, Func<TState, GraphContext, CancellationToken, Task<TState>> handler)
-  AddEdge(string from, string to)
-  AddConditionalEdge(string from, Func<TState, string> condition, 
-  Dictionary<string, string> routes)
-  SetEntryPoint(string nodeName)
-  SetEndPoint(string nodeName)
-  RunAsync(TState initialState, CancellationToken) returning Task<ChainResult<TState>>
-- GraphContext record: string CurrentNode, int StepCount, DateTimeOffset StartedAt
-- Guard against cycles exceeding a MaxSteps limit (default 50), return ChainError if exceeded
-
-### 15. src/WeaveLLM.Core/Extensions/ChainExtensions.cs
-- Extension methods on IChain<TInput, TOutput>:
-  WithMiddleware(IChainMiddleware<TInput, TOutput>) — wraps chain with middleware
-  Then<TNext>(IChain<TOutput, TNext>) — composes two chains sequentially
-
-After creating all files, verify:
-- All types are in the WeaveLLM.Core namespace (sub-namespaces for each folder)
-- No circular dependencies between namespaces
-- The .csproj builds with: dotnet build src/WeaveLLM.Core/WeaveLLM.Core.csproj
-- Run dotnet build and fix any errors before finishing
+## After creating all files:
+1. Run: dotnet build WeaveLLM.sln
+2. Run: dotnet test WeaveLLM.sln
+3. Fix any build or test errors before finishing
+4. Report the final solution structure as a file tree

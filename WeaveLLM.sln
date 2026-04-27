@@ -7,11 +7,17 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeaveLLM.Core", "src\WeaveL
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeaveLLM.Providers", "src\WeaveLLM.Providers\WeaveLLM.Providers.csproj", "{11111111-0000-0000-0000-000000000002}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeaveLLM.Observability", "src\WeaveLLM.Observability\WeaveLLM.Observability.csproj", "{11111111-0000-0000-0000-000000000003}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeaveLLM.Memory", "src\WeaveLLM.Memory\WeaveLLM.Memory.csproj", "{11111111-0000-0000-0000-000000000003}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeaveLLM.Extensions.DependencyInjection", "src\WeaveLLM.Extensions.DependencyInjection\WeaveLLM.Extensions.DependencyInjection.csproj", "{11111111-0000-0000-0000-000000000004}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeaveLLM.Observability", "src\WeaveLLM.Observability\WeaveLLM.Observability.csproj", "{11111111-0000-0000-0000-000000000004}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeaveLLM.Sample.BasicChain", "samples\WeaveLLM.Sample.BasicChain\WeaveLLM.Sample.BasicChain.csproj", "{11111111-0000-0000-0000-000000000005}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeaveLLM.Extensions.DependencyInjection", "src\WeaveLLM.Extensions.DependencyInjection\WeaveLLM.Extensions.DependencyInjection.csproj", "{11111111-0000-0000-0000-000000000005}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeaveLLM.Sample.BasicChain", "samples\WeaveLLM.Sample.BasicChain\WeaveLLM.Sample.BasicChain.csproj", "{11111111-0000-0000-0000-000000000006}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeaveLLM.Core.Tests", "tests\WeaveLLM.Core.Tests\WeaveLLM.Core.Tests.csproj", "{11111111-0000-0000-0000-000000000007}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeaveLLM.Providers.Tests", "tests\WeaveLLM.Providers.Tests\WeaveLLM.Providers.Tests.csproj", "{11111111-0000-0000-0000-000000000008}"
 EndProject
 
 Global
@@ -36,5 +42,21 @@ Global
         {11111111-0000-0000-0000-000000000004}.Debug|Any CPU.Build.0 = Debug|Any CPU
         {11111111-0000-0000-0000-000000000004}.Release|Any CPU.ActiveCfg = Release|Any CPU
         {11111111-0000-0000-0000-000000000004}.Release|Any CPU.Build.0 = Release|Any CPU
+        {11111111-0000-0000-0000-000000000005}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+        {11111111-0000-0000-0000-000000000005}.Debug|Any CPU.Build.0 = Debug|Any CPU
+        {11111111-0000-0000-0000-000000000005}.Release|Any CPU.ActiveCfg = Release|Any CPU
+        {11111111-0000-0000-0000-000000000005}.Release|Any CPU.Build.0 = Release|Any CPU
+        {11111111-0000-0000-0000-000000000006}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+        {11111111-0000-0000-0000-000000000006}.Debug|Any CPU.Build.0 = Debug|Any CPU
+        {11111111-0000-0000-0000-000000000006}.Release|Any CPU.ActiveCfg = Release|Any CPU
+        {11111111-0000-0000-0000-000000000006}.Release|Any CPU.Build.0 = Release|Any CPU
+        {11111111-0000-0000-0000-000000000007}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+        {11111111-0000-0000-0000-000000000007}.Debug|Any CPU.Build.0 = Debug|Any CPU
+        {11111111-0000-0000-0000-000000000007}.Release|Any CPU.ActiveCfg = Release|Any CPU
+        {11111111-0000-0000-0000-000000000007}.Release|Any CPU.Build.0 = Release|Any CPU
+        {11111111-0000-0000-0000-000000000008}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+        {11111111-0000-0000-0000-000000000008}.Debug|Any CPU.Build.0 = Debug|Any CPU
+        {11111111-0000-0000-0000-000000000008}.Release|Any CPU.ActiveCfg = Release|Any CPU
+        {11111111-0000-0000-0000-000000000008}.Release|Any CPU.Build.0 = Release|Any CPU
     EndGlobalSection
 EndGlobal

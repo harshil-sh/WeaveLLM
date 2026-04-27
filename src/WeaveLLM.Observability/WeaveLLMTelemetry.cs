@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using WeaveLLM.Core.Models;
-using WeaveLLM.Core.Providers;
+using ILanguageModel = WeaveLLM.Core.Providers.ILanguageModel;
 
 namespace WeaveLLM.Observability;
 

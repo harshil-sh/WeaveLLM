@@ -30,3 +30,9 @@ Thumbs.db
 
 # Test results
 TestResults/
+
+# Environment secrets
+.env
+
+# markup files
+WeaveLLM_Dev_Playbook.md

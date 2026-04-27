@@ -38,6 +38,13 @@ public static class ChainExtensions
         this IChain<TInput, TMiddle> first,
         IChain<TMiddle, TNext> second)
         => new ComposedChain<TInput, TMiddle, TNext>(first, second);
+
+    /// <summary>
+    /// Wraps <paramref name="chain"/> in a <see cref="IConnectableChain{TIn,TOut}"/> so it can be
+    /// composed with <c>Pipe</c> and decorated with <c>WithMiddleware</c> fluently.
+    /// </summary>
+    public static IConnectableChain<TIn, TOut> AsConnectable<TIn, TOut>(this IChain<TIn, TOut> chain)
+        => new WeaveLLM.Core.Chains.ConnectableChain<TIn, TOut>(chain);
 }
 
 /// <summary>

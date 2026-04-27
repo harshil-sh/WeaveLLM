@@ -1,16 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-    <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <PackageId>WeaveLLM.Observability</PackageId>
+    <PackageId>WeaveLLM.Memory</PackageId>
     <Version>0.1.0-alpha</Version>
-    <Description>OpenTelemetry tracing, metrics, and LLM evaluation for WeaveLLM</Description>
+    <Description>Memory and vector store implementations for WeaveLLM</Description>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\WeaveLLM.Core\WeaveLLM.Core.csproj" />
-    <PackageReference Include="OpenTelemetry" />
-    <PackageReference Include="OpenTelemetry.Extensions.Hosting" />
   </ItemGroup>
 </Project>

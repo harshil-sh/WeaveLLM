@@ -1,0 +1,17 @@
+<Project>
+  <PropertyGroup>
+    <LangVersion>12.0</LangVersion>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Authors>WeaveLLM Contributors</Authors>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/yourusername/WeaveLLM</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/yourusername/WeaveLLM</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageIconUrl>https://raw.githubusercontent.com/yourusername/WeaveLLM/main/icon.png</PackageIconUrl>
+  </PropertyGroup>
+</Project>

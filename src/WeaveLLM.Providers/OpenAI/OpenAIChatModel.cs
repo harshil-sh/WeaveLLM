@@ -4,7 +4,6 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using WeaveLLM.Core.Models;
-using WeaveLLM.Core.Providers;
 
 namespace WeaveLLM.Providers.OpenAI;
 
@@ -16,14 +15,14 @@ public sealed class OpenAIChatModel(
     string apiKey,
     string modelId = "gpt-4o",
     string baseUrl = "https://api.openai.com/v1",
-    HttpClient? httpClient = null) : IChatModel
+    HttpClient? httpClient = null) : WeaveLLM.Core.Providers.IChatModel
 {
     private readonly HttpClient _http = httpClient ?? CreateDefaultClient(apiKey, baseUrl);
 
     public string ProviderName => "openai";
     public string ModelId { get; } = modelId;
 
-    public async Task<ChainResult<Message>> ChatAsync(
+    public async Task<ChainResult<ChatResponse>> ChatAsync(
         IReadOnlyList<Message> messages,
         LLMOptions? options = null,
         CancellationToken cancellationToken = default)
@@ -36,26 +35,30 @@ public sealed class OpenAIChatModel(
             if (!response.IsSuccessStatusCode)
             {
                 var error = await response.Content.ReadAsStringAsync(cancellationToken);
-                return ChainResult<Message>.Failure(WeaveLLMError.ProviderError("openai", $"{response.StatusCode}: {error}"));
+                return ChainResult<ChatResponse>.Failure(WeaveLLMError.ProviderError("openai", $"{response.StatusCode}: {error}"));
             }
 
             var result = await response.Content.ReadFromJsonAsync<OpenAIResponse>(cancellationToken: cancellationToken);
             var choice = result?.Choices?.FirstOrDefault();
             if (choice is null)
-                return ChainResult<Message>.Failure(WeaveLLMError.ProviderError("openai", "Empty response"));
+                return ChainResult<ChatResponse>.Failure(WeaveLLMError.ProviderError("openai", "Empty response"));
 
-            var message = Message.Assistant(choice.Message?.Content ?? string.Empty);
             var usage = new TokenUsage
             {
                 PromptTokens = result?.Usage?.PromptTokens ?? 0,
                 CompletionTokens = result?.Usage?.CompletionTokens ?? 0
             };
+            var chatResponse = new ChatResponse
+            {
+                Content = choice.Message?.Content ?? string.Empty,
+                Usage = new UsageStats(usage.PromptTokens, usage.CompletionTokens, usage.TotalTokens)
+            };
 
-            return ChainResult<Message>.Success(message, usage);
+            return ChainResult<ChatResponse>.Success(chatResponse, usage);
         }
         catch (Exception ex)
         {
-            return ChainResult<Message>.Failure(new WeaveLLMError(ex.Message, "PROVIDER_ERROR", ex));
+            return ChainResult<ChatResponse>.Failure(new WeaveLLMError(ex.Message, "PROVIDER_ERROR", ex));
         }
     }
 

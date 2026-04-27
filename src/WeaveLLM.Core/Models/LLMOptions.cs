@@ -39,4 +39,10 @@ public sealed record LLMOptions
     /// </summary>
     public static LLMOptions Precise(int maxTokens = 2048) =>
         new() { Temperature = 0.0f, MaxTokens = maxTokens };
+
+    /// <summary>
+    /// Deterministic preset — zero temperature for reproducible outputs (e.g., evaluation and grading).
+    /// </summary>
+    public static LLMOptions Deterministic(int maxTokens = 256) =>
+        new() { Temperature = 0.0f, MaxTokens = maxTokens };
 }

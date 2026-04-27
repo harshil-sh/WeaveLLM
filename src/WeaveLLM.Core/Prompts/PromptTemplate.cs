@@ -1,70 +1,97 @@
-using System.Text;
 using System.Text.RegularExpressions;
-using WeaveLLM.Core.Models;
 
 namespace WeaveLLM.Core.Prompts;
 
 /// <summary>
-/// Compile-time validated prompt templates. Supports {{variable}} syntax.
-/// Validates that all required variables are provided before execution.
-/// </summary>
-public interface IPromptTemplate
-{
-    string Name { get; }
-    IReadOnlySet<string> RequiredVariables { get; }
-    IReadOnlySet<string> OptionalVariables { get; }
-
-    string Render(IReadOnlyDictionary<string, object> variables);
-    PromptValidationResult Validate(IReadOnlyDictionary<string, object> variables);
-}
-
-public sealed class PromptValidationResult
-{
-    public bool IsValid { get; init; }
-    public IReadOnlyList<string> MissingVariables { get; init; } = [];
-    public IReadOnlyList<string> UnknownVariables { get; init; } = [];
-
-    public static PromptValidationResult Valid() => new() { IsValid = true };
-    public static PromptValidationResult Invalid(IReadOnlyList<string> missing) =>
-        new() { IsValid = false, MissingVariables = missing };
-}
-
-/// <summary>
-/// Handlebars-style template: {{variable}}, {{#if condition}}...{{/if}}, {{#each items}}...{{/each}}
+/// Handlebars-style prompt template supporting {{variable}}, {{#if variable}}...{{/if}},
+/// and {{#each items}}...{{/each}} syntax.
 /// </summary>
 public sealed class PromptTemplate : IPromptTemplate
 {
-    private static readonly Regex VariablePattern = new(@"\{\{(\w+)\}\}", RegexOptions.Compiled);
+    private static readonly Regex VariablePattern =
+        new(@"\{\{(\w+)\}\}", RegexOptions.Compiled);
+
+    private static readonly Regex IfPattern =
+        new(@"\{\{#if\s+(\w+)\}\}(.*?)\{\{/if\}\}", RegexOptions.Compiled | RegexOptions.Singleline);
+
+    private static readonly Regex EachPattern =
+        new(@"\{\{#each\s+(\w+)\}\}(.*?)\{\{/each\}\}", RegexOptions.Compiled | RegexOptions.Singleline);
+
     private readonly string _template;
 
     public string Name { get; }
     public IReadOnlySet<string> RequiredVariables { get; }
-    public IReadOnlySet<string> OptionalVariables { get; } = new HashSet<string>();
+    public IReadOnlySet<string> OptionalVariables { get; }
 
-    private PromptTemplate(string name, string template, IReadOnlySet<string>? optionalVariables = null)
+    private PromptTemplate(string name, string template, string[]? optionalVariables = null)
     {
         Name = name;
         _template = template;
-        OptionalVariables = optionalVariables ?? new HashSet<string>();
+        OptionalVariables = optionalVariables?.ToHashSet() ?? new HashSet<string>();
 
-        var allVars = VariablePattern.Matches(template)
+        // Strip {{#each}}...{{/each}} blocks before scanning so iteration
+        // placeholders like {{this}} are not counted as required variables.
+        var scanTemplate = EachPattern.Replace(template, string.Empty);
+
+        var allVars = VariablePattern.Matches(scanTemplate)
             .Select(m => m.Groups[1].Value)
             .ToHashSet();
 
         RequiredVariables = allVars.Except(OptionalVariables).ToHashSet();
     }
 
-    public static PromptTemplate Create(string name, string template, IReadOnlySet<string>? optionalVars = null) =>
+    public static PromptTemplate Create(string name, string template, string[]? optionalVars = null) =>
         new(name, template, optionalVars);
 
+    /// <inheritdoc />
     public string Render(IReadOnlyDictionary<string, object> variables)
     {
+        var missing = RequiredVariables.Except(variables.Keys).ToList();
+        if (missing.Count > 0)
+            throw new InvalidOperationException(
+                $"Missing required template variables: {string.Join(", ", missing)}");
+
         var result = _template;
+
+        // Process {{#each items}}...{{/each}} blocks first.
+        result = EachPattern.Replace(result, m =>
+        {
+            var varName = m.Groups[1].Value;
+            var body = m.Groups[2].Value;
+            if (variables.TryGetValue(varName, out var val) && val is IEnumerable<string> items)
+                return string.Concat(items.Select(item => body.Replace("{{this}}", item)));
+            return string.Empty;
+        });
+
+        // Process {{#if variable}}...{{/if}} blocks.
+        result = IfPattern.Replace(result, m =>
+        {
+            var varName = m.Groups[1].Value;
+            var body = m.Groups[2].Value;
+            if (!variables.TryGetValue(varName, out var val))
+                return string.Empty;
+            var isTruthy = val switch
+            {
+                bool b => b,
+                string s => !string.IsNullOrEmpty(s),
+                _ => val != null
+            };
+            return isTruthy ? body : string.Empty;
+        });
+
+        // Replace {{variable}} tokens for provided variables.
         foreach (var (key, value) in variables)
             result = result.Replace($"{{{{{key}}}}}", value?.ToString() ?? string.Empty);
+
+        // Clear any remaining optional variable tokens that were not supplied.
+        foreach (var optVar in OptionalVariables)
+            if (!variables.ContainsKey(optVar))
+                result = result.Replace($"{{{{{optVar}}}}}", string.Empty);
+
         return result;
     }
 
+    /// <inheritdoc />
     public PromptValidationResult Validate(IReadOnlyDictionary<string, object> variables)
     {
         var missing = RequiredVariables.Except(variables.Keys).ToList();
@@ -73,7 +100,7 @@ public sealed class PromptTemplate : IPromptTemplate
             : PromptValidationResult.Invalid(missing);
     }
 
-    // Pre-built common templates
+    // Pre-built common templates (kept for backward compatibility).
     public static readonly PromptTemplate QuestionAnswer = Create(
         "question_answer",
         """
@@ -85,7 +112,8 @@ public sealed class PromptTemplate : IPromptTemplate
         {{/if}}
 
         Question: {{question}}
-        """);
+        """,
+        optionalVars: ["context"]);
 
     public static readonly PromptTemplate RAGAnswer = Create(
         "rag_answer",
@@ -112,7 +140,7 @@ public sealed class PromptTemplate : IPromptTemplate
 
         Summary:
         """,
-        optionalVars: new HashSet<string> { "style", "maxWords" });
+        optionalVars: ["style", "maxWords"]);
 
     public static readonly PromptTemplate ReActAgent = Create(
         "react_agent",
@@ -137,8 +165,7 @@ public sealed class PromptTemplate : IPromptTemplate
 }
 
 /// <summary>
-/// Manages a versioned library of prompt templates.
-/// Supports A/B testing via named variants.
+/// Manages a versioned library of prompt templates. Supports A/B testing via named variants.
 /// </summary>
 public sealed class PromptLibrary
 {
