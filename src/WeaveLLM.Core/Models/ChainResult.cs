@@ -8,6 +8,10 @@ namespace WeaveLLM.Core.Models;
 public sealed class ChainResult<T>
 {
     public bool IsSuccess { get; init; }
+
+    /// <summary>Convenience inverse of <see cref="IsSuccess"/>.</summary>
+    public bool IsFailure => !IsSuccess;
+
     public T? Value { get; init; }
     public WeaveLLMError? Error { get; init; }
     public TimeSpan Duration { get; init; }
