@@ -25,6 +25,14 @@ public interface IToolRegistry
 
     /// <summary>Returns a snapshot of all currently registered tool definitions.</summary>
     IReadOnlyList<ToolDefinition> GetAll();
+
+    /// <summary>
+    /// Reflects all public instance methods on <paramref name="instance"/> that carry
+    /// <see cref="LLMToolAttribute"/>, builds JSON Schema for their parameters, and
+    /// registers each as a <see cref="ToolDefinition"/>.
+    /// </summary>
+    /// <param name="instance">The object whose public methods carry <see cref="LLMToolAttribute"/>.</param>
+    void RegisterFromObject(object instance);
 }
 
 /// <summary>

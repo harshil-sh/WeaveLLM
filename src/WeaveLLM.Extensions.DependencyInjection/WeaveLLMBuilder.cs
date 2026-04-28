@@ -4,6 +4,7 @@ using WeaveLLM.Core.Providers;
 using WeaveLLM.Core.RAG;
 using WeaveLLM.Core.Tools;
 using IToolRegistry = WeaveLLM.Core.Tools.IToolRegistry;
+using ToolRegistry = WeaveLLM.Core.Tools.ToolRegistry;
 using WeaveLLM.Providers.Anthropic;
 using WeaveLLM.Providers.OpenAI;
 using Microsoft.Extensions.Configuration;

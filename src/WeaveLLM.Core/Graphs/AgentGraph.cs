@@ -93,6 +93,52 @@ public sealed class AgentGraph<TState> where TState : class, new()
     }
 
     /// <summary>
+    /// Validates the graph structure and caches the result.
+    /// </summary>
+    private string? _validationError;
+    private bool _validated;
+
+    private string? Validate()
+    {
+        if (_validated) return _validationError;
+        _validated = true;
+
+        var issues = new List<string>();
+
+        if (string.IsNullOrEmpty(_entryPoint))
+            issues.Add("Entry point is not set. Call SetEntryPoint().");
+        else if (!_nodes.ContainsKey(_entryPoint))
+            issues.Add($"Entry point '{_entryPoint}' is not a registered node.");
+
+        if (string.IsNullOrEmpty(_endPoint))
+            issues.Add("End point is not set. Call SetEndPoint().");
+
+        foreach (var (from, edges) in _edges)
+        {
+            foreach (var edge in edges)
+            {
+                if (edge.To is not null && edge.To != _endPoint && !_nodes.ContainsKey(edge.To))
+                    issues.Add($"Edge target '{edge.To}' (from '{from}') is not a registered node.");
+
+                if (edge.Routes is not null)
+                {
+                    foreach (var (key, target) in edge.Routes)
+                    {
+                        if (target != _endPoint && !_nodes.ContainsKey(target))
+                            issues.Add($"Conditional route target '{target}' (key '{key}', from '{from}') is not a registered node.");
+                    }
+                }
+            }
+        }
+
+        _validationError = issues.Count > 0
+            ? "Graph validation failed: " + string.Join("; ", issues)
+            : null;
+
+        return _validationError;
+    }
+
+    /// <summary>
     /// Runs the graph from the entry point to the end point, threading
     /// <paramref name="initialState"/> through each node in sequence.
     /// </summary>
@@ -100,8 +146,7 @@ public sealed class AgentGraph<TState> where TState : class, new()
     /// <param name="cancellationToken">Cancellation support.</param>
     /// <returns>
     /// A <see cref="ChainResult{T}"/> containing the final state on success,
-    /// or a <see cref="WeaveLLMError"/> if a node fails, the graph cycles beyond
-    /// <see cref="DefaultMaxSteps"/>, or the operation is cancelled.
+    /// or a descriptive failure for validation errors, cycles, or dead ends.
     /// </returns>
     /// <exception cref="InvalidOperationException">Thrown if <see cref="SetEntryPoint"/> was never called.</exception>
     public async Task<ChainResult<TState>> RunAsync(
@@ -111,7 +156,12 @@ public sealed class AgentGraph<TState> where TState : class, new()
         if (_entryPoint is null)
             throw new InvalidOperationException("Entry point not set. Call SetEntryPoint() before RunAsync().");
 
-        var context = new GraphContext(_entryPoint, 0, DateTimeOffset.UtcNow);
+        var validationError = Validate();
+        if (validationError is not null)
+            return ChainResult<TState>.Failure(validationError, "InvalidGraph");
+
+        var startedAt = DateTimeOffset.UtcNow;
+        var context = new GraphContext(_entryPoint, 0, startedAt);
         var state = initialState;
         var stepCount = 0;
 
@@ -119,17 +169,17 @@ public sealed class AgentGraph<TState> where TState : class, new()
                context.CurrentNode is not null &&
                !cancellationToken.IsCancellationRequested)
         {
-            if (stepCount >= _maxSteps)
+            stepCount++;
+            if (stepCount > _maxSteps)
                 return ChainResult<TState>.Failure(
-                    $"Graph exceeded maximum step count ({_maxSteps}). Possible infinite cycle detected.",
-                    "GRAPH_MAX_STEPS_EXCEEDED");
+                    $"Graph exceeded {_maxSteps} steps — possible cycle. Increase MaxSteps or check edges.",
+                    "MaxStepsCycleDetected");
 
             if (!_nodes.TryGetValue(context.CurrentNode, out var handler))
                 return ChainResult<TState>.Failure(
-                    $"Node '{context.CurrentNode}' is referenced in an edge but was never registered via AddNode().",
-                    "GRAPH_NODE_NOT_FOUND");
+                    $"Node '{context.CurrentNode}' is not registered.",
+                    "InvalidGraph");
 
-            stepCount++;
             context = context with { StepCount = stepCount };
 
             try
@@ -145,28 +195,37 @@ public sealed class AgentGraph<TState> where TState : class, new()
                 return ChainResult<TState>.Failure(ex.Message, "NODE_EXECUTION_FAILED");
             }
 
-            var nextNode = ResolveNextNode(context.CurrentNode, state);
-            context = context with { CurrentNode = nextNode ?? _endPoint ?? string.Empty };
+            var (nextNode, deadEnd) = ResolveNextNode(context.CurrentNode, state);
+            if (deadEnd)
+                return ChainResult<TState>.Failure(
+                    $"No edge from node '{context.CurrentNode}'. Add an edge or set it as the end point.",
+                    "GraphDeadEnd");
+
+            context = context with { CurrentNode = nextNode! };
         }
 
         return ChainResult<TState>.Success(state);
     }
 
-    private string? ResolveNextNode(string current, TState state)
+    private (string? nextNode, bool deadEnd) ResolveNextNode(string current, TState state)
     {
         if (!_edges.TryGetValue(current, out var edges) || edges.Count == 0)
-            return _endPoint;
+        {
+            // No edges: only valid if this node IS the end point
+            return current == _endPoint ? (_endPoint, false) : (null, true);
+        }
 
         foreach (var edge in edges)
         {
             if (edge.Condition is null)
-                return edge.To;
+                return (edge.To, false);
 
             var routeKey = edge.Condition(state);
-            return edge.Routes?.TryGetValue(routeKey, out var mapped) == true ? mapped : routeKey;
+            var target = edge.Routes?.TryGetValue(routeKey, out var mapped) == true ? mapped : routeKey;
+            return (target, false);
         }
 
-        return _endPoint;
+        return (null, true);
     }
 
     private List<GraphEdge<TState>> GetEdges(string node)
