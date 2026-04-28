@@ -35,4 +35,4 @@ TestResults/
 .env
 
 # markup files
-WeaveLLM_Dev_Playbook.md
+docs-internal/
