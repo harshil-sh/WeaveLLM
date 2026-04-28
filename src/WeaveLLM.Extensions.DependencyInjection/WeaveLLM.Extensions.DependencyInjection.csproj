@@ -9,6 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\WeaveLLM.Core\WeaveLLM.Core.csproj" />
     <ProjectReference Include="..\WeaveLLM.Providers\WeaveLLM.Providers.csproj" />
     <ProjectReference Include="..\WeaveLLM.Memory\WeaveLLM.Memory.csproj" />
