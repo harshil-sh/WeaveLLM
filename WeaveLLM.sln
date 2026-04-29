@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeaveLLM.Providers.Tests", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeaveLLM.Memory.Tests", "tests\WeaveLLM.Memory.Tests\WeaveLLM.Memory.Tests.csproj", "{11111111-0000-0000-0000-000000000009}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeaveLLM.Observability.Tests", "tests\WeaveLLM.Observability.Tests\WeaveLLM.Observability.Tests.csproj", "{11111111-0000-0000-0000-00000000000B}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatWithDocs", "samples\ChatWithDocs\ChatWithDocs.csproj", "{11111111-0000-0000-0000-00000000000A}"
 EndProject
 
@@ -70,5 +72,9 @@ Global
         {11111111-0000-0000-0000-00000000000A}.Debug|Any CPU.Build.0 = Debug|Any CPU
         {11111111-0000-0000-0000-00000000000A}.Release|Any CPU.ActiveCfg = Release|Any CPU
         {11111111-0000-0000-0000-00000000000A}.Release|Any CPU.Build.0 = Release|Any CPU
+        {11111111-0000-0000-0000-00000000000B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+        {11111111-0000-0000-0000-00000000000B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+        {11111111-0000-0000-0000-00000000000B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+        {11111111-0000-0000-0000-00000000000B}.Release|Any CPU.Build.0 = Release|Any CPU
     EndGlobalSection
 EndGlobal

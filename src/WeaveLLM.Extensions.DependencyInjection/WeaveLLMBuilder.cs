@@ -2,11 +2,13 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using OpenTelemetry;
 using WeaveLLM.Core.Agents;
 using WeaveLLM.Core.Memory;
 using WeaveLLM.Core.Models;
 using WeaveLLM.Core.Prompts;
 using WeaveLLM.Extensions.DependencyInjection.HealthChecks;
+using WeaveLLM.Observability.Tracing;
 // using WeaveLLM.Memory.InMemory; -- accessed via MemoryInMemoryStore alias below to avoid ambiguity
 using WeaveLLM.Providers.Anthropic;
 using WeaveLLM.Providers.HuggingFace;
@@ -315,6 +317,25 @@ public sealed class WeaveLLMBuilder(IServiceCollection services)
     public WeaveLLMBuilder AddRagPipeline()
     {
         Services.AddScoped<WeaveLLM.Core.RAG.IRagPipeline, WeaveLLM.Core.RAG.DefaultRagPipeline>();
+        return this;
+    }
+
+    // ── Observability ─────────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Registers OpenTelemetry tracing and metrics for WeaveLLM.
+    /// Adds sources and meters under the <c>"WeaveLLM"</c> name so any OTel exporter
+    /// (Jaeger, Zipkin, Prometheus, OTLP) will pick them up automatically.
+    /// </summary>
+    public WeaveLLMBuilder AddWeaveLLMTelemetry()
+    {
+        Services.AddSingleton(WeaveLLMTelemetry.ActivitySource);
+        Services.AddSingleton(WeaveLLMTelemetry.Meter);
+
+        Services.AddOpenTelemetry()
+            .WithTracing(b => b.AddSource("WeaveLLM"))
+            .WithMetrics(b => b.AddMeter("WeaveLLM"));
+
         return this;
     }
 
