@@ -36,4 +36,7 @@ TestResults/
 
 # markup files
 docs-internal/
-CLUADE.md.claude/
+
+# Copilot CLI local files
+CLUADE.md
+.claude/
