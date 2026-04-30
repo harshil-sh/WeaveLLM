@@ -1,0 +1,51 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build, Test & Publish
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore
+        run: dotnet restore WeaveLLM.sln
+
+      - name: Build
+        run: dotnet build WeaveLLM.sln --no-restore --configuration Release
+
+      - name: Test
+        run: dotnet test WeaveLLM.sln --no-build --configuration Release --verbosity normal
+
+      - name: Pack
+        run: dotnet pack src/WeaveLLM.Core/WeaveLLM.Core.csproj --no-build --configuration Release --output ./nupkgs
+
+      - name: Push to NuGet.org
+        run: |
+          dotnet nuget push ./nupkgs/*.nupkg \
+            --api-key ${{ secrets.NUGET_API_KEY }} \
+            --source https://api.nuget.org/v3/index.json \
+            --skip-duplicate
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ github.ref_name }}
+          generate_release_notes: true
+          files: |
+            ./nupkgs/*.nupkg
+            ./nupkgs/*.snupkg
