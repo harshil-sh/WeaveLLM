@@ -25,6 +25,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeaveLLM.Observability.Test
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatWithDocs", "samples\ChatWithDocs\ChatWithDocs.csproj", "{11111111-0000-0000-0000-00000000000A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeaveLLM.IntegrationTests", "tests\WeaveLLM.IntegrationTests\WeaveLLM.IntegrationTests.csproj", "{11111111-0000-0000-0000-00000000000C}"
+EndProject
 
 Global
     GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -76,5 +78,9 @@ Global
         {11111111-0000-0000-0000-00000000000B}.Debug|Any CPU.Build.0 = Debug|Any CPU
         {11111111-0000-0000-0000-00000000000B}.Release|Any CPU.ActiveCfg = Release|Any CPU
         {11111111-0000-0000-0000-00000000000B}.Release|Any CPU.Build.0 = Release|Any CPU
+        {11111111-0000-0000-0000-00000000000C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+        {11111111-0000-0000-0000-00000000000C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+        {11111111-0000-0000-0000-00000000000C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+        {11111111-0000-0000-0000-00000000000C}.Release|Any CPU.Build.0 = Release|Any CPU
     EndGlobalSection
 EndGlobal

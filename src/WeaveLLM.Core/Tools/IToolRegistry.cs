@@ -187,20 +187,19 @@ public sealed class ToolRegistry : IToolRegistry
 public sealed class WebSearchTool
 {
     [LLMTool("web_search", "Search the web for current information")]
-    public async Task<string> SearchAsync(
+    public Task<string> SearchAsync(
         [Description("The search query")] string query,
         [Description("Maximum number of results")] int maxResults = 5)
     {
-        // Implement with your preferred search API (Bing, Serper, Brave, etc.)
-        await Task.Delay(100); // placeholder
-        return $"Search results for: {query}";
+        // Replace with a real HTTP call to Bing, Serper, Brave, etc.
+        return Task.FromResult($"Search results for: {query}");
     }
 
     [LLMTool("get_weather", "Get current weather for a location")]
-    public async Task<string> GetWeatherAsync(
+    public Task<string> GetWeatherAsync(
         [Description("City name or coordinates")] string location)
     {
-        await Task.Delay(100); // placeholder
-        return $"Weather for {location}: Sunny, 22°C";
+        // Replace with a real HTTP call to a weather provider.
+        return Task.FromResult($"Weather for {location}: Sunny, 22°C");
     }
 }
