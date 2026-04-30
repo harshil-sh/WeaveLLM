@@ -44,8 +44,8 @@ public sealed class TracingMiddleware<TInput, TOutput> : IChainMiddleware<TInput
         else
         {
             activity?.SetStatus(ActivityStatusCode.Error, result.Error!.Message);
-            activity?.SetTag("error.code", result.Error.Code);
-            activity?.SetTag("error.message", result.Error.Message);
+            activity?.SetTag("error.code", result.Error!.Code);
+            activity?.SetTag("error.message", result.Error!.Message);
         }
 
         LlmMetrics.RecordRequest(

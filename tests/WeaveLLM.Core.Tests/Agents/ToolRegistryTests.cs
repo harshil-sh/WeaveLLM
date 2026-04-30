@@ -10,8 +10,6 @@ public class ToolRegistryTests
 {
     private sealed class SampleTools
     {
-        public int EchoCallCount;
-
         [LLMTool("echo", "Returns the input string unchanged")]
         public Task<string> EchoAsync(
             [Description("The text to echo")] string text) =>
