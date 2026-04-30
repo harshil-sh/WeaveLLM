@@ -11,7 +11,7 @@
     <PackageProjectUrl>https://github.com/yourusername/WeaveLLM</PackageProjectUrl>
     <RepositoryUrl>https://github.com/yourusername/WeaveLLM</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageIconUrl>https://raw.githubusercontent.com/yourusername/WeaveLLM/main/icon.png</PackageIconUrl>
+    <PackageReadmeFile>NUGET_README.md</PackageReadmeFile>
+    <PackageIcon>Icon.jpg</PackageIcon>
   </PropertyGroup>
 </Project>

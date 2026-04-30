@@ -22,6 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+    <None Include="..\..\NUGET_README.md" Pack="true" PackagePath="\" />
+    <None Include="..\..\Icon.jpg" Pack="true" PackagePath="\" />
   </ItemGroup>
 </Project>
