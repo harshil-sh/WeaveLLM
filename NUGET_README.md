@@ -49,8 +49,8 @@ dotnet add package WeaveLLM.Extensions.DependencyInjection
 
 ## Links
 
-- [GitHub](https://github.com/harshil-inspire2/WeaveLLM)
-- [Samples](https://github.com/harshil-inspire2/WeaveLLM/tree/main/samples)
-- [Discussions](https://github.com/harshil-inspire2/WeaveLLM/discussions)
+- [GitHub](https://github.com/harshil-sh/WeaveLLM)
+- [Samples](https://github.com/harshil-sh/WeaveLLM/tree/main/samples)
+- [Discussions](https://github.com/harshil-sh/WeaveLLM/discussions)
 
 ⭐ Star on GitHub to follow development

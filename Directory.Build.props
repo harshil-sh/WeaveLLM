@@ -8,8 +8,8 @@
   <PropertyGroup>
     <Authors>WeaveLLM Contributors</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/yourusername/WeaveLLM</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/yourusername/WeaveLLM</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/harshil-sh/WeaveLLM</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/harshil-sh/WeaveLLM</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageReadmeFile>NUGET_README.md</PackageReadmeFile>
     <PackageIcon>Icon.jpg</PackageIcon>
