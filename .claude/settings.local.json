@@ -6,7 +6,17 @@
       "Bash(cat)",
       "Read(//tmp/**)",
       "Bash(dotnet list *)",
-      "Bash(dotnet clean *)"
+      "Bash(dotnet clean *)",
+      "Bash(grep -E \"^\\(bin/|obj/|.*\\\\.user$|nupkgs/\\)\")",
+      "Bash(npm --version)",
+      "Bash(npx --version)",
+      "Bash(where silicon *)",
+      "Bash(where pwsh *)",
+      "Bash(npm init *)",
+      "Bash(npm install *)",
+      "Bash(npx playwright *)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\Harshil\\\\Documents\\\\LLMPortfolio\\\\WeaveLLM\" -Recurse -Directory)",
+      "Bash(Select-Object -ExpandProperty FullName)"
     ]
   }
 }

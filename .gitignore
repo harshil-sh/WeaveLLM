@@ -40,3 +40,6 @@ docs-internal/
 # Copilot CLI local files
 CLUADE.md
 .claude/
+
+# Marketing assets
+marketing/
