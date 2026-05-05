@@ -188,7 +188,7 @@ public sealed class AgentGraph<TState> where TState : class, new()
             }
             catch (OperationCanceledException)
             {
-                return ChainResult<TState>.Failure("Graph execution was cancelled.", "CANCELLED");
+                return ChainResult<TState>.Failure(WeaveLLMError.Cancelled("Graph execution was cancelled."));
             }
             catch (Exception ex)
             {

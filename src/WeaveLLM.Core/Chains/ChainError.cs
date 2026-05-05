@@ -32,4 +32,34 @@ public sealed record ChainError(string Code, string Message, Exception? InnerExc
     /// <summary>Creates an error when a tool invocation fails.</summary>
     public static ChainError ToolExecutionFailed(string toolName, string reason) =>
         new("TOOL_EXECUTION_FAILED", $"Tool '{toolName}' failed: {reason}");
+
+    /// <summary>Creates an error when a requested resource is not found.</summary>
+    /// <remarks>Error code emitted: <c>NOT_FOUND</c> (SCREAMING_SNAKE_CASE — canonical for all WeaveLLM factory methods).</remarks>
+    public static ChainError NotFound(string message) =>
+        new("NOT_FOUND", message);
+
+    /// <summary>Creates an error when the operation is cancelled.</summary>
+    /// <remarks>Error code emitted: <c>CANCELLED</c> (SCREAMING_SNAKE_CASE — canonical for all WeaveLLM factory methods).</remarks>
+    public static ChainError Cancelled(string message, Exception? inner = null) =>
+        new("CANCELLED", message, inner);
+
+    /// <summary>Creates an error when authentication fails.</summary>
+    /// <remarks>Error code emitted: <c>AUTHENTICATION_FAILED</c> (SCREAMING_SNAKE_CASE — canonical for all WeaveLLM factory methods).</remarks>
+    public static ChainError AuthenticationFailed(string message) =>
+        new("AUTHENTICATION_FAILED", message);
+
+    /// <summary>Creates an error when the provider's rate limit is exceeded.</summary>
+    /// <remarks>Error code emitted: <c>RATE_LIMIT_EXCEEDED</c> (SCREAMING_SNAKE_CASE — canonical for all WeaveLLM factory methods).</remarks>
+    public static ChainError RateLimitExceeded(string message) =>
+        new("RATE_LIMIT_EXCEEDED", message);
+
+    /// <summary>Creates an error when a network timeout occurs.</summary>
+    /// <remarks>Error code emitted: <c>NETWORK_TIMEOUT</c> (SCREAMING_SNAKE_CASE — canonical for all WeaveLLM factory methods).</remarks>
+    public static ChainError NetworkTimeout(string message, Exception? inner = null) =>
+        new("NETWORK_TIMEOUT", message, inner);
+
+    /// <summary>Creates an error for invalid or missing configuration.</summary>
+    /// <remarks>Error code emitted: <c>INVALID_CONFIGURATION</c> (SCREAMING_SNAKE_CASE — canonical for all WeaveLLM factory methods).</remarks>
+    public static ChainError InvalidConfiguration(string message) =>
+        new("INVALID_CONFIGURATION", message);
 }

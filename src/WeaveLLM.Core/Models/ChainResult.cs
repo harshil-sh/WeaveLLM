@@ -231,6 +231,56 @@ public sealed record WeaveLLMError(string Message, string Code, Exception? Inner
     /// <returns>A <see cref="WeaveLLMError"/> with code <c>"PROVIDER_ERROR"</c>.</returns>
     /// <remarks>Error code emitted: <c>PROVIDER_ERROR</c> (SCREAMING_SNAKE_CASE — canonical for all WeaveLLM factory methods).</remarks>
     public static WeaveLLMError ProviderError(string provider, string message) => new($"[{provider}] {message}", "PROVIDER_ERROR");
+
+    /// <summary>
+    /// Creates a not-found error with the given message.
+    /// </summary>
+    /// <param name="message">Description of what was not found.</param>
+    /// <returns>A <see cref="WeaveLLMError"/> with code <c>"NOT_FOUND"</c>.</returns>
+    /// <remarks>Error code emitted: <c>NOT_FOUND</c> (SCREAMING_SNAKE_CASE — canonical for all WeaveLLM factory methods).</remarks>
+    public static WeaveLLMError NotFound(string message) => new(message, "NOT_FOUND");
+
+    /// <summary>
+    /// Creates a cancellation error with the given message.
+    /// </summary>
+    /// <param name="message">Description of why the operation was cancelled.</param>
+    /// <param name="inner">Optional originating exception.</param>
+    /// <returns>A <see cref="WeaveLLMError"/> with code <c>"CANCELLED"</c>.</returns>
+    /// <remarks>Error code emitted: <c>CANCELLED</c> (SCREAMING_SNAKE_CASE — canonical for all WeaveLLM factory methods).</remarks>
+    public static WeaveLLMError Cancelled(string message, Exception? inner = null) => new(message, "CANCELLED", inner);
+
+    /// <summary>
+    /// Creates an authentication-failure error with the given message.
+    /// </summary>
+    /// <param name="message">Description of the authentication failure.</param>
+    /// <returns>A <see cref="WeaveLLMError"/> with code <c>"AUTHENTICATION_FAILED"</c>.</returns>
+    /// <remarks>Error code emitted: <c>AUTHENTICATION_FAILED</c> (SCREAMING_SNAKE_CASE — canonical for all WeaveLLM factory methods).</remarks>
+    public static WeaveLLMError AuthenticationFailed(string message) => new(message, "AUTHENTICATION_FAILED");
+
+    /// <summary>
+    /// Creates a rate-limit-exceeded error with the given message.
+    /// </summary>
+    /// <param name="message">Description of the rate limit exceeded condition.</param>
+    /// <returns>A <see cref="WeaveLLMError"/> with code <c>"RATE_LIMIT_EXCEEDED"</c>.</returns>
+    /// <remarks>Error code emitted: <c>RATE_LIMIT_EXCEEDED</c> (SCREAMING_SNAKE_CASE — canonical for all WeaveLLM factory methods).</remarks>
+    public static WeaveLLMError RateLimitExceeded(string message) => new(message, "RATE_LIMIT_EXCEEDED");
+
+    /// <summary>
+    /// Creates a network-timeout error with the given message.
+    /// </summary>
+    /// <param name="message">Description of the network timeout.</param>
+    /// <param name="inner">Optional originating exception.</param>
+    /// <returns>A <see cref="WeaveLLMError"/> with code <c>"NETWORK_TIMEOUT"</c>.</returns>
+    /// <remarks>Error code emitted: <c>NETWORK_TIMEOUT</c> (SCREAMING_SNAKE_CASE — canonical for all WeaveLLM factory methods).</remarks>
+    public static WeaveLLMError NetworkTimeout(string message, Exception? inner = null) => new(message, "NETWORK_TIMEOUT", inner);
+
+    /// <summary>
+    /// Creates an invalid-configuration error with the given message.
+    /// </summary>
+    /// <param name="message">Description of the configuration problem.</param>
+    /// <returns>A <see cref="WeaveLLMError"/> with code <c>"INVALID_CONFIGURATION"</c>.</returns>
+    /// <remarks>Error code emitted: <c>INVALID_CONFIGURATION</c> (SCREAMING_SNAKE_CASE — canonical for all WeaveLLM factory methods).</remarks>
+    public static WeaveLLMError InvalidConfiguration(string message) => new(message, "INVALID_CONFIGURATION");
 }
 
 /// <summary>
