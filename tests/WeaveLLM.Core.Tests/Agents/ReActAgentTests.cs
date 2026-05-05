@@ -75,7 +75,7 @@ public class ReActAgentTests
         var result = await agent.RunAsync("Infinite question");
 
         result.IsFailure.Should().BeTrue();
-        result.Error!.Code.Should().Be("MaxStepsExceeded");
+        result.Error!.Code.Should().Be("MAX_STEPS_EXCEEDED");
         result.Error.Message.Should().Contain("2 steps");
     }
 
@@ -116,7 +116,7 @@ public class ReActAgentTests
         await agent.RunAsync("test");
 
         await observer.Received(1).OnErrorAsync(
-            Arg.Is<ChainError>(e => e.Code == "MaxStepsExceeded"),
+            Arg.Is<ChainError>(e => e.Code == "MAX_STEPS_EXCEEDED"),
             Arg.Any<int>(), Arg.Any<CancellationToken>());
     }
 

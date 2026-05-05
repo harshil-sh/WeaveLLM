@@ -204,6 +204,7 @@ public sealed record WeaveLLMError(string Message, string Code, Exception? Inner
     /// </summary>
     /// <param name="chainName">Name of the chain that exceeded its time limit.</param>
     /// <returns>A <see cref="WeaveLLMError"/> with code <c>"TIMEOUT"</c>.</returns>
+    /// <remarks>Error code emitted: <c>TIMEOUT</c> (SCREAMING_SNAKE_CASE — canonical for all WeaveLLM factory methods).</remarks>
     public static WeaveLLMError Timeout(string chainName) => new($"Chain '{chainName}' timed out.", "TIMEOUT");
 
     /// <summary>
@@ -211,6 +212,7 @@ public sealed record WeaveLLMError(string Message, string Code, Exception? Inner
     /// </summary>
     /// <param name="provider">Name of the provider that returned a rate-limit response.</param>
     /// <returns>A <see cref="WeaveLLMError"/> with code <c>"RATE_LIMITED"</c>.</returns>
+    /// <remarks>Error code emitted: <c>RATE_LIMITED</c> (SCREAMING_SNAKE_CASE — canonical for all WeaveLLM factory methods).</remarks>
     public static WeaveLLMError RateLimited(string provider) => new($"Rate limited by provider '{provider}'.", "RATE_LIMITED");
 
     /// <summary>
@@ -218,6 +220,7 @@ public sealed record WeaveLLMError(string Message, string Code, Exception? Inner
     /// </summary>
     /// <param name="message">Description of what was wrong with the input.</param>
     /// <returns>A <see cref="WeaveLLMError"/> with code <c>"INVALID_INPUT"</c>.</returns>
+    /// <remarks>Error code emitted: <c>INVALID_INPUT</c> (SCREAMING_SNAKE_CASE — canonical for all WeaveLLM factory methods).</remarks>
     public static WeaveLLMError InvalidInput(string message) => new(message, "INVALID_INPUT");
 
     /// <summary>
@@ -226,6 +229,7 @@ public sealed record WeaveLLMError(string Message, string Code, Exception? Inner
     /// <param name="provider">Name of the LLM provider that returned the error.</param>
     /// <param name="message">Error detail returned by the provider.</param>
     /// <returns>A <see cref="WeaveLLMError"/> with code <c>"PROVIDER_ERROR"</c>.</returns>
+    /// <remarks>Error code emitted: <c>PROVIDER_ERROR</c> (SCREAMING_SNAKE_CASE — canonical for all WeaveLLM factory methods).</remarks>
     public static WeaveLLMError ProviderError(string provider, string message) => new($"[{provider}] {message}", "PROVIDER_ERROR");
 }
 

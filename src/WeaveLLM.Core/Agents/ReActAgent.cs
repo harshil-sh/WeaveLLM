@@ -85,7 +85,7 @@ public sealed class ReActAgent : IAgent
             if (!result.IsSuccess)
             {
                 await _observer
-                    .OnErrorAsync(new ChainError("ProviderError", result.Error!.Message), step, cancellationToken)
+                    .OnErrorAsync(ChainError.ProviderError(result.Error!.Message), step, cancellationToken)
                     .ConfigureAwait(false);
                 return ChainResult<AgentResult>.Failure(result.Error!);
             }
@@ -153,7 +153,7 @@ public sealed class ReActAgent : IAgent
         }
 
         var maxStepsError = new ChainError(
-            "MaxStepsExceeded",
+            "MAX_STEPS_EXCEEDED",
             $"Agent hit {_maxSteps} steps without a Final Answer. Increase maxSteps or simplify the task.");
 
         await _observer
