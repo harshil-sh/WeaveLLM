@@ -233,6 +233,16 @@ public sealed record WeaveLLMError(string Message, string Code, Exception? Inner
     public static WeaveLLMError ProviderError(string provider, string message) => new($"[{provider}] {message}", "PROVIDER_ERROR");
 
     /// <summary>
+    /// Creates a provider-level error prefixed with the provider name, attaching the originating exception.
+    /// </summary>
+    /// <param name="provider">Name of the LLM provider that returned the error.</param>
+    /// <param name="message">Error detail returned by the provider.</param>
+    /// <param name="inner">The originating exception.</param>
+    /// <returns>A <see cref="WeaveLLMError"/> with code <c>"PROVIDER_ERROR"</c>.</returns>
+    /// <remarks>Error code emitted: <c>PROVIDER_ERROR</c> (SCREAMING_SNAKE_CASE — canonical for all WeaveLLM factory methods).</remarks>
+    public static WeaveLLMError ProviderError(string provider, string message, Exception inner) => new($"[{provider}] {message}", "PROVIDER_ERROR", inner);
+
+    /// <summary>
     /// Creates a not-found error with the given message.
     /// </summary>
     /// <param name="message">Description of what was not found.</param>

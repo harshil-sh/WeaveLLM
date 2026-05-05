@@ -109,6 +109,49 @@ public sealed class OllamaChatModel(
     }
 
     /// <inheritdoc/>
+    public async IAsyncEnumerable<ChainResult<string>> StreamChatSafeAsync(
+        IReadOnlyList<Message> messages,
+        LLMOptions? options = null,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        await using var enumerator = StreamChatAsync(messages, options, cancellationToken)
+            .GetAsyncEnumerator(cancellationToken);
+
+        while (true)
+        {
+            if (cancellationToken.IsCancellationRequested)
+            {
+                yield return ChainResult<string>.Failure(
+                    WeaveLLMError.Cancelled($"Streaming cancelled by '{ProviderName}'."));
+                yield break;
+            }
+
+            ChainResult<string>? failure = null;
+            bool hasNext;
+            try
+            {
+                hasNext = await enumerator.MoveNextAsync();
+            }
+            catch (OperationCanceledException ex)
+            {
+                failure = ChainResult<string>.Failure(
+                    WeaveLLMError.Cancelled($"Streaming cancelled by '{ProviderName}'.", ex));
+                hasNext = false;
+            }
+            catch (Exception ex)
+            {
+                failure = ChainResult<string>.Failure(
+                    WeaveLLMError.ProviderError(ProviderName, ex.Message, ex));
+                hasNext = false;
+            }
+
+            if (failure is not null) { yield return failure; yield break; }
+            if (!hasNext) yield break;
+            yield return ChainResult<string>.Success(enumerator.Current);
+        }
+    }
+
+    /// <inheritdoc/>
     public async Task<ChainResult<float[]>> EmbedAsync(string text, CancellationToken cancellationToken = default)
     {
         try

@@ -48,6 +48,16 @@ namespace WeaveLLM.Core.Providers
             IReadOnlyList<Message> messages,
             LLMOptions? options = null,
             CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Streaming variant that wraps each token in <see cref="ChainResult{T}"/>.
+        /// On provider error, yields a single Failure item then stops — never throws.
+        /// Prefer this over <see cref="StreamChatAsync"/> when callers use yield return.
+        /// </summary>
+        IAsyncEnumerable<ChainResult<string>> StreamChatSafeAsync(
+            IReadOnlyList<Message> messages,
+            LLMOptions? options = null,
+            CancellationToken cancellationToken = default);
     }
 }
 
