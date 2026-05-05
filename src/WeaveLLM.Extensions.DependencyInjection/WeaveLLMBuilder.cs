@@ -18,7 +18,7 @@ using WeaveLLM.Providers.OpenAI;
 // WeaveLLM.Core.Models.* — used by agents (IStreamingChatModel, IChatModel, IEmbeddingModel)
 // WeaveLLM.Core.Providers.* — implemented by concrete provider classes
 using ProviderIChatModel = WeaveLLM.Core.Providers.IChatModel;
-using ProviderIEmbeddingModel = WeaveLLM.Core.Providers.IEmbeddingModel;
+using ProviderIEmbeddingModel = WeaveLLM.Core.Providers.Embeddings.IEmbeddingModel;
 using MemoryInMemoryStore = WeaveLLM.Memory.InMemory.InMemoryStore;
 
 namespace WeaveLLM.Extensions.DependencyInjection;

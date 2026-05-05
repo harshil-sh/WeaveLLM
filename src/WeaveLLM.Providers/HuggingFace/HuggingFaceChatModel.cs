@@ -15,7 +15,7 @@ public sealed class HuggingFaceChatModel(
     string apiKey,
     string modelId,
     string baseUrl = "https://api-inference.huggingface.co",
-    HttpClient? httpClient = null) : WeaveLLM.Core.Providers.IChatModel, WeaveLLM.Core.Providers.IEmbeddingModel
+    HttpClient? httpClient = null) : WeaveLLM.Core.Providers.IChatModel, WeaveLLM.Core.Providers.Embeddings.IEmbeddingModel
 {
     private readonly HttpClient _http = httpClient ?? CreateDefaultClient(apiKey, baseUrl);
     private static readonly JsonSerializerOptions _jsonOptions = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };

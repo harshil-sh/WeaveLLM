@@ -14,7 +14,7 @@ namespace WeaveLLM.Providers.Ollama;
 public sealed class OllamaChatModel(
     string baseUrl = "http://localhost:11434",
     string modelId = "llama3",
-    HttpClient? httpClient = null) : WeaveLLM.Core.Providers.IChatModel, WeaveLLM.Core.Providers.IEmbeddingModel
+    HttpClient? httpClient = null) : WeaveLLM.Core.Providers.IChatModel, WeaveLLM.Core.Providers.Embeddings.IEmbeddingModel
 {
     private readonly HttpClient _http = httpClient ?? CreateDefaultClient(baseUrl);
     private static readonly JsonSerializerOptions _jsonOptions = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };

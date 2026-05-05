@@ -16,7 +16,7 @@ public sealed class OpenAIChatModel(
     string apiKey,
     string modelId = "gpt-4o",
     string baseUrl = "https://api.openai.com/v1",
-    HttpClient? httpClient = null) : WeaveLLM.Core.Providers.IChatModel, WeaveLLM.Core.Providers.IEmbeddingModel
+    HttpClient? httpClient = null) : WeaveLLM.Core.Providers.IChatModel, WeaveLLM.Core.Providers.Embeddings.IEmbeddingModel
 {
     private readonly HttpClient _http = httpClient ?? CreateDefaultClient(apiKey, baseUrl);
     private static readonly JsonSerializerOptions _jsonOptions = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
