@@ -33,18 +33,31 @@ namespace WeaveLLM.Core.Providers
     }
 
     /// <summary>
-    /// Chat-capable model interface. Processes a full conversation history and returns a structured reply.
+    /// Streaming-only capability of a chat model.
+    /// IChatModel extends this interface — inject IStreamingChatModel directly
+    /// when blocking completion methods are not needed.
     /// </summary>
-    public interface IChatModel : ILanguageModel
+    public interface IStreamingChatModel
     {
-        /// <summary>Sends a conversation and returns a structured <see cref="ChatResponse"/>.</summary>
-        Task<ChainResult<ChatResponse>> ChatAsync(
+        /// <summary>
+        /// Streams the model reply token-by-token. Throws on provider error.
+        /// For a never-throw variant see StreamChatSafeAsync.
+        /// </summary>
+        IAsyncEnumerable<string> StreamChatAsync(
             IReadOnlyList<Message> messages,
             LLMOptions? options = null,
             CancellationToken cancellationToken = default);
+    }
 
-        /// <summary>Streams the model's reply token-by-token.</summary>
-        IAsyncEnumerable<string> StreamChatAsync(
+    /// <summary>
+    /// Chat-capable model. Provides blocking (ChatAsync) and streaming
+    /// (StreamChatAsync via IStreamingChatModel) generation. Inject
+    /// IStreamingChatModel directly for streaming-only consumers.
+    /// </summary>
+    public interface IChatModel : ILanguageModel, IStreamingChatModel
+    {
+        /// <summary>Sends a conversation and returns a structured <see cref="ChatResponse"/>.</summary>
+        Task<ChainResult<ChatResponse>> ChatAsync(
             IReadOnlyList<Message> messages,
             LLMOptions? options = null,
             CancellationToken cancellationToken = default);
