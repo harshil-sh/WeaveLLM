@@ -12,20 +12,51 @@ namespace WeaveLLM.Providers.OpenAI;
 /// Also provides text embeddings via the Embeddings API.
 /// Uses raw HttpClient; no vendor SDK dependency.
 /// </summary>
-public sealed class OpenAIChatModel(
-    string apiKey,
-    string modelId = "gpt-4o",
-    string baseUrl = "https://api.openai.com/v1",
-    HttpClient? httpClient = null) : WeaveLLM.Core.Providers.IChatModel, WeaveLLM.Core.Providers.Embeddings.IEmbeddingModel
+public sealed class OpenAIChatModel : WeaveLLM.Core.Providers.IChatModel, WeaveLLM.Core.Providers.Embeddings.IEmbeddingModel
 {
-    private readonly HttpClient _http = httpClient ?? CreateDefaultClient(apiKey, baseUrl);
+    private readonly HttpClient? _httpDirect;
+    private readonly IHttpClientFactory? _httpClientFactory;
+    private readonly string _httpClientName;
     private static readonly JsonSerializerOptions _jsonOptions = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+
+    private HttpClient Http => _httpDirect ?? _httpClientFactory!.CreateClient(_httpClientName);
+
+    /// <summary>
+    /// Use in unit tests or when HttpClient lifetime is managed externally.
+    /// For production, prefer the IHttpClientFactory overload.
+    /// </summary>
+    public OpenAIChatModel(
+        string apiKey,
+        string modelId = "gpt-4o",
+        string baseUrl = "https://api.openai.com/v1",
+        HttpClient? httpClient = null)
+    {
+        ModelId = modelId;
+        _httpDirect = httpClient ?? CreateDefaultClient(apiKey, baseUrl);
+        _httpClientName = string.Empty;
+    }
+
+    /// <summary>
+    /// Preferred for production — resolves HttpClient via IHttpClientFactory,
+    /// enabling named-client configuration and Polly retry policies.
+    /// </summary>
+    public OpenAIChatModel(
+        string apiKey,
+        string modelId,
+        string baseUrl,
+        IHttpClientFactory httpClientFactory,
+        string httpClientName = "weave-openai")
+    {
+        ModelId = modelId;
+        _httpClientFactory = httpClientFactory;
+        _httpClientName = httpClientName;
+    }
 
     /// <inheritdoc/>
     public string ProviderName => "openai";
 
     /// <inheritdoc/>
-    public string ModelId { get; } = modelId;
+    public string ModelId { get; }
 
     /// <inheritdoc/>
     public int Dimensions => 1536; // text-embedding-3-small default
@@ -39,7 +70,7 @@ public sealed class OpenAIChatModel(
         try
         {
             var request = BuildChatRequest(messages, options, stream: false);
-            var response = await _http.PostAsJsonAsync("chat/completions", request, _jsonOptions, cancellationToken);
+            var response = await Http.PostAsJsonAsync("chat/completions", request, _jsonOptions, cancellationToken);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -83,7 +114,7 @@ public sealed class OpenAIChatModel(
             Content = new StringContent(json, Encoding.UTF8, "application/json")
         };
 
-        using var response = await _http.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+        using var response = await Http.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
         response.EnsureSuccessStatusCode();
 
         await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
@@ -151,7 +182,7 @@ public sealed class OpenAIChatModel(
         try
         {
             var request = new { input = text, model = "text-embedding-3-small" };
-            var response = await _http.PostAsJsonAsync("embeddings", request, _jsonOptions, cancellationToken);
+            var response = await Http.PostAsJsonAsync("embeddings", request, _jsonOptions, cancellationToken);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -180,7 +211,7 @@ public sealed class OpenAIChatModel(
         try
         {
             var request = new { input = texts, model = "text-embedding-3-small" };
-            var response = await _http.PostAsJsonAsync("embeddings", request, _jsonOptions, cancellationToken);
+            var response = await Http.PostAsJsonAsync("embeddings", request, _jsonOptions, cancellationToken);
 
             if (!response.IsSuccessStatusCode)
             {

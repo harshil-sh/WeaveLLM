@@ -12,18 +12,48 @@ namespace WeaveLLM.Providers.Anthropic;
 /// Maps WeaveLLM's message format to Anthropic's messages API; system prompt goes to the
 /// top-level "system" field, not inside the messages array.
 /// </summary>
-public sealed class AnthropicChatModel(
-    string apiKey,
-    string modelId = "claude-sonnet-4-5",
-    HttpClient? httpClient = null) : WeaveLLM.Core.Providers.IChatModel
+public sealed class AnthropicChatModel : WeaveLLM.Core.Providers.IChatModel
 {
-    private readonly HttpClient _http = httpClient ?? CreateDefaultClient(apiKey);
+    private readonly HttpClient? _httpDirect;
+    private readonly IHttpClientFactory? _httpClientFactory;
+    private readonly string _httpClientName;
+
+    private HttpClient Http => _httpDirect ?? _httpClientFactory!.CreateClient(_httpClientName);
+
+    /// <summary>
+    /// Use in unit tests or when HttpClient lifetime is managed externally.
+    /// For production, prefer the IHttpClientFactory overload.
+    /// </summary>
+    public AnthropicChatModel(
+        string apiKey,
+        string modelId = "claude-sonnet-4-5",
+        HttpClient? httpClient = null)
+    {
+        ModelId = modelId;
+        _httpDirect = httpClient ?? CreateDefaultClient(apiKey);
+        _httpClientName = string.Empty;
+    }
+
+    /// <summary>
+    /// Preferred for production — resolves HttpClient via IHttpClientFactory,
+    /// enabling named-client configuration and Polly retry policies.
+    /// </summary>
+    public AnthropicChatModel(
+        string apiKey,
+        string modelId,
+        IHttpClientFactory httpClientFactory,
+        string httpClientName = "weave-anthropic")
+    {
+        ModelId = modelId;
+        _httpClientFactory = httpClientFactory;
+        _httpClientName = httpClientName;
+    }
 
     /// <inheritdoc/>
     public string ProviderName => "anthropic";
 
     /// <inheritdoc/>
-    public string ModelId { get; } = modelId;
+    public string ModelId { get; }
 
     /// <inheritdoc/>
     public async Task<ChainResult<ChatResponse>> ChatAsync(
@@ -50,7 +80,7 @@ public sealed class AnthropicChatModel(
             if (options?.Temperature is not null) request["temperature"] = options.Temperature;
             if (options?.TopP is not null) request["top_p"] = options.TopP;
 
-            var response = await _http.PostAsJsonAsync("messages", request, cancellationToken);
+            var response = await Http.PostAsJsonAsync("messages", request, cancellationToken);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -103,7 +133,7 @@ public sealed class AnthropicChatModel(
             Content = new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json")
         };
 
-        using var response = await _http.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+        using var response = await Http.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
         response.EnsureSuccessStatusCode();
 
         await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
