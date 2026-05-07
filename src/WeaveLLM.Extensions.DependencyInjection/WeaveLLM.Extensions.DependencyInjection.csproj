@@ -4,12 +4,13 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <PackageId>WeaveLLM.Extensions.DependencyInjection</PackageId>
-    <Version>0.1.0-alpha</Version>
+    <Version>0.2.0-alpha</Version>
     <Description>ASP.NET Core and IServiceCollection integration for WeaveLLM</Description>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+    <None Include="..\..\NUGET_README.md" Pack="true" PackagePath="\" />
+    <None Include="..\..\Icon.jpg" Pack="true" PackagePath="\" />
   </ItemGroup>
 
   <ItemGroup>

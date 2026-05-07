@@ -201,6 +201,81 @@ Console.WriteLine(result.Value!.FinalAnswer);
 
 ---
 
+## Testing with WeaveLLM
+
+Add the testing helper package to your test project — no real API keys or network calls required:
+
+```sh
+dotnet add package WeaveLLM.Testing
+```
+
+### Option A — FakeStreamingChatModel (recommended)
+
+`FakeStreamingChatModel` is a fully configurable in-process test double for `IChatModel`.
+Set `Tokens` for streaming assertions, `BlockingResponse` for `ChatAsync`, and
+`ErrorAfterTokens` to simulate mid-stream failures:
+
+```csharp
+using WeaveLLM.Testing;
+
+var fake = new FakeStreamingChatModel
+{
+    Tokens = ["Hello", ", ", "world", "!"],
+    BlockingResponse = "Hello, world!"
+};
+
+// Blocking path
+var result = await fake.ChatAsync([Message.User("Hi")]);
+result.IsSuccess.Should().BeTrue();
+result.Value!.Content.Should().Be("Hello, world!");
+
+// Streaming path
+var tokens = new List<string>();
+await foreach (var chunk in fake.StreamChatAsync([Message.User("Hi")]))
+    tokens.Add(chunk);
+tokens.Should().Equal("Hello", ", ", "world", "!");
+
+// Error injection — yields 2 tokens then a failure
+fake.ErrorAfterTokens = WeaveLLMError.ProviderError("fake", "Quota exceeded");
+fake.TokensBeforeError = 2;
+var results = new List<ChainResult<string>>();
+await foreach (var item in fake.StreamChatSafeAsync([Message.User("Hi")]))
+    results.Add(item);
+results[2].IsFailure.Should().BeTrue();
+results[2].Error!.Code.Should().Be("PROVIDER_ERROR");
+```
+
+### Option B — NSubstitute manual pattern
+
+When you need a mock rather than a fake, use NSubstitute with a static async-iterator
+helper. The `[EnumeratorCancellation]` attribute on the `CancellationToken` parameter
+is **required** — without it, the token passed via `.WithCancellation(ct)` is silently
+ignored and cancellation tests never fire:
+
+```csharp
+using NSubstitute;
+using System.Runtime.CompilerServices;
+
+var model = Substitute.For<IChatModel>();
+
+model.StreamChatAsync(Arg.Any<IReadOnlyList<Message>>(), Arg.Any<LLMOptions?>(), Arg.Any<CancellationToken>())
+     .Returns(FakeStream("Hello", ", ", "world"));
+
+static async IAsyncEnumerable<string> FakeStream(
+    params string[] tokens,
+    [EnumeratorCancellation] CancellationToken ct = default)   // ← required
+{
+    foreach (var token in tokens)
+    {
+        ct.ThrowIfCancellationRequested();
+        yield return token;
+        await Task.Yield();
+    }
+}
+```
+
+---
+
 ## Contributing
 
 Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) for branch conventions, coding guidelines, and the pull-request checklist before opening a PR.

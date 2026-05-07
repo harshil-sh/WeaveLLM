@@ -47,6 +47,25 @@ dotnet add package WeaveLLM.Observability
 dotnet add package WeaveLLM.Extensions.DependencyInjection
 ```
 
+## Testing
+
+Use `WeaveLLM.Testing` to unit-test code that depends on `IChatModel` without any real API calls:
+
+```sh
+dotnet add package WeaveLLM.Testing
+```
+
+```csharp
+var fake = new FakeStreamingChatModel
+{
+    Tokens = ["Hello", ", ", "world", "!"],
+    BlockingResponse = "Hello, world!"
+};
+
+var result = await fake.ChatAsync([Message.User("Hi")]);
+result.Value!.Content // → "Hello, world!"
+```
+
 ## Links
 
 - [GitHub](https://github.com/harshil-sh/WeaveLLM)

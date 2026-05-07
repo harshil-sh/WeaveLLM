@@ -32,7 +32,11 @@ jobs:
         run: dotnet test WeaveLLM.sln --no-build --configuration Release --verbosity normal
 
       - name: Pack
-        run: dotnet pack src/WeaveLLM.Core/WeaveLLM.Core.csproj --no-build --configuration Release --output ./nupkgs
+        run: |
+          dotnet pack src/WeaveLLM.Core/WeaveLLM.Core.csproj --no-build --configuration Release --output ./nupkgs
+          dotnet pack src/WeaveLLM.Providers/WeaveLLM.Providers.csproj --no-build --configuration Release --output ./nupkgs
+          dotnet pack src/WeaveLLM.Extensions.DependencyInjection/WeaveLLM.Extensions.DependencyInjection.csproj --no-build --configuration Release --output ./nupkgs
+          dotnet pack src/WeaveLLM.Testing/WeaveLLM.Testing.csproj --no-build --configuration Release --output ./nupkgs
 
       - name: Push to NuGet.org
         run: |
