@@ -8,6 +8,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\WeaveLLM.Core\WeaveLLM.Core.csproj" />
     <ProjectReference Include="..\..\src\WeaveLLM.Providers\WeaveLLM.Providers.csproj" />
+    <ProjectReference Include="..\..\src\WeaveLLM.Extensions.DependencyInjection\WeaveLLM.Extensions.DependencyInjection.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -19,5 +20,7 @@
     </PackageReference>
     <PackageReference Include="FluentAssertions" />
     <PackageReference Include="NSubstitute" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" />
   </ItemGroup>
 </Project>
