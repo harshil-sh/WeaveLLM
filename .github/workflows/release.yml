@@ -35,6 +35,8 @@ jobs:
         run: |
           dotnet pack src/WeaveLLM.Core/WeaveLLM.Core.csproj --no-build --configuration Release --output ./nupkgs
           dotnet pack src/WeaveLLM.Providers/WeaveLLM.Providers.csproj --no-build --configuration Release --output ./nupkgs
+          dotnet pack src/WeaveLLM.Memory/WeaveLLM.Memory.csproj --no-build --configuration Release --output ./nupkgs
+          dotnet pack src/WeaveLLM.Observability/WeaveLLM.Observability.csproj --no-build --configuration Release --output ./nupkgs
           dotnet pack src/WeaveLLM.Extensions.DependencyInjection/WeaveLLM.Extensions.DependencyInjection.csproj --no-build --configuration Release --output ./nupkgs
           dotnet pack src/WeaveLLM.Testing/WeaveLLM.Testing.csproj --no-build --configuration Release --output ./nupkgs
 

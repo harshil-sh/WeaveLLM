@@ -3,13 +3,20 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>WeaveLLM.Observability</RootNamespace>
+    <AssemblyName>WeaveLLM.Observability</AssemblyName>
     <PackageId>WeaveLLM.Observability</PackageId>
-    <Version>0.1.0-alpha</Version>
+    <Version>0.2.1-alpha</Version>
     <Description>OpenTelemetry tracing, metrics, and LLM evaluation for WeaveLLM</Description>
+    <PackageTags>ai;llm;weavellm;opentelemetry;tracing;metrics;observability;dotnet</PackageTags>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+    <None Include="..\..\NUGET_README.md" Pack="true" PackagePath="\" />
+    <None Include="..\..\Icon.jpg" Pack="true" PackagePath="\" />
   </ItemGroup>
 
   <ItemGroup>

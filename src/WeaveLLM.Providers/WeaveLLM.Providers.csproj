@@ -4,7 +4,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <PackageId>WeaveLLM.Providers</PackageId>
-    <Version>0.2.0-alpha</Version>
+    <Version>0.2.1-alpha</Version>
     <Description>OpenAI, Anthropic, Azure OpenAI, and Ollama providers for WeaveLLM</Description>
     <PackageTags>ai;llm;openai;anthropic;azure;ollama;dotnet;weavellm</PackageTags>
   </PropertyGroup>

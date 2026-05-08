@@ -7,7 +7,7 @@
     <AssemblyName>WeaveLLM.Core</AssemblyName>
 
     <PackageId>WeaveLLM.Core</PackageId>
-    <Version>0.2.0-alpha</Version>
+    <Version>0.2.1-alpha</Version>
     <Description>Core abstractions for WeaveLLM — the AI orchestration framework for .NET</Description>
     <PackageTags>ai;llm;langchain;dotnet;csharp;rag;agents;openai;anthropic;semantic-kernel</PackageTags>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>

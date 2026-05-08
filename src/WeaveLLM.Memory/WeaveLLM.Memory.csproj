@@ -1,11 +1,23 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>WeaveLLM.Memory</RootNamespace>
+    <AssemblyName>WeaveLLM.Memory</AssemblyName>
     <PackageId>WeaveLLM.Memory</PackageId>
-    <Version>0.1.0-alpha</Version>
-    <Description>Memory and vector store implementations for WeaveLLM</Description>
+    <Version>0.2.1-alpha</Version>
+    <Description>Memory and vector store implementations for WeaveLLM — in-memory, PostgreSQL/pgvector, and Qdrant stores.</Description>
+    <PackageTags>ai;llm;weavellm;memory;vector-store;rag;pgvector;qdrant;dotnet</PackageTags>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\NUGET_README.md" Pack="true" PackagePath="\" />
+    <None Include="..\..\Icon.jpg" Pack="true" PackagePath="\" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Http" />

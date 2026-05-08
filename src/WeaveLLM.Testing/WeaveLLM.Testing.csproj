@@ -7,7 +7,7 @@
     <AssemblyName>WeaveLLM.Testing</AssemblyName>
 
     <PackageId>WeaveLLM.Testing</PackageId>
-    <Version>0.2.0-alpha</Version>
+    <Version>0.2.1-alpha</Version>
     <Description>Pre-built test doubles and fakes for unit-testing WeaveLLM integrations — no real API calls required.</Description>
     <PackageTags>ai;llm;weavellm;testing;fakes;test-doubles;xunit;dotnet</PackageTags>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
